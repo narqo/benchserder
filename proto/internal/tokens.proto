@@ -1,0 +1,16 @@
+syntax = "proto3";
+package github.com.narqo.benchserder.internal;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option (gogoproto.protosizer_all) = true;
+option (gogoproto.sizer_all) = false;
+option go_package = "tokens";
+
+enum TrackerToken {
+	option (gogoproto.enumdecl) = false;
+	option (gogoproto.goproto_enum_prefix) = false;
+	option (gogoproto.goproto_enum_stringer) = false;
+	EMPTY_TRACKER_TOKEN = 0 [(gogoproto.enumvalue_customname) = "EmptyTrackerToken"];
+}
+

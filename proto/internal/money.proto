@@ -1,0 +1,30 @@
+syntax = "proto3";
+package github.com.narqo.benchserder.internal;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option (gogoproto.protosizer_all) = true;
+option (gogoproto.sizer_all) = false;
+option go_package = "money";
+
+// easyjson:json
+message Amount {
+	option (gogoproto.goproto_getters) = false;
+	option (gogoproto.goproto_stringer) = false;
+	option (gogoproto.typedecl) = false;
+	double original_amount = 1;
+	string original_currency = 2;
+	double base_amount = 3;
+	double reporting_amount = 4;
+	string reporting_currency = 5;
+}
+
+// represents costs that could be associated with an incoming activity
+// easyjson:json
+message Cost {
+	option (gogoproto.goproto_getters) = false;
+	option (gogoproto.typedecl) = false;
+	github.com.narqo.benchserder.internal.Amount amount = 1 [(gogoproto.nullable) = false];
+	int64 cost_type = 2 [(gogoproto.casttype) = "CostType"];
+}
+
