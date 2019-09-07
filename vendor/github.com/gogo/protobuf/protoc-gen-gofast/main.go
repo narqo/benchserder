@@ -1,7 +1,7 @@
-// Go support for Protocol Buffers - Google's data interchange format
+// Protocol Buffers for Go with Gadgets
 //
-// Copyright 2010 The Go Authors.  All rights reserved.
-// https://github.com/golang/protobuf
+// Copyright (c) 2015, The GoGo Authors. All rights reserved.
+// http://github.com/gogo/protobuf
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -13,9 +13,6 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of Google Inc. nor the names of its
-// contributors may be used to endorse or promote products derived from
-// this software without specific prior written permission.
 //
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 // "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -29,23 +26,23 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-/*
-	A plugin for the Google protocol buffer compiler to generate Go code.
-	Run it by building this program and putting it in your path with the name
-		protoc-gen-gogo
-	That word 'gogo' at the end becomes part of the option string set for the
-	protocol compiler, so once the protocol compiler (protoc) is installed
-	you can run
-		protoc --gogo_out=output_directory input_directory/file.proto
-	to generate Go bindings for the protocol defined by file.proto.
-	With that input, the output will be written to
-		output_directory/go_package/file.pb.go
+package main
 
-	The generated code is documented in the package comment for
-	the library.
+import (
+	"github.com/gogo/protobuf/vanity"
+	"github.com/gogo/protobuf/vanity/command"
+)
 
-	See the README and documentation for protocol buffers to learn more:
-		https://developers.google.com/protocol-buffers/
+func main() {
+	req := command.Read()
+	files := req.GetProtoFile()
 
-*/
-package documentation
+	vanity.ForEachFile(files, vanity.TurnOffGogoImport)
+
+	vanity.ForEachFile(files, vanity.TurnOnMarshalerAll)
+	vanity.ForEachFile(files, vanity.TurnOnSizerAll)
+	vanity.ForEachFile(files, vanity.TurnOnUnmarshalerAll)
+
+	resp := command.Generate(req)
+	command.Write(resp)
+}

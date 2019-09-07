@@ -3,6 +3,8 @@ package nullable
 type String struct {
 	String string
 	Valid  bool
+
+	XXX_unrecognized []byte `json:"-"`
 }
 
 func NewString(s string) String {

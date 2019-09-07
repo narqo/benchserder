@@ -1,6 +1,5 @@
 package replacer
 
-//proteus:generate
 type ActivityKind string
 
 const (

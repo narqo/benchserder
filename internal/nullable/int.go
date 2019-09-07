@@ -5,6 +5,8 @@ import "strconv"
 type Int struct {
 	Int   int
 	Valid bool
+
+	XXX_unrecognized []byte `json:"-"`
 }
 
 func NewInt(value int) Int {

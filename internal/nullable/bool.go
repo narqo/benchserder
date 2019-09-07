@@ -5,6 +5,8 @@ import "database/sql"
 type Bool struct {
 	Bool  bool
 	Valid bool
+
+	XXX_unrecognized []byte `json:"-"`
 }
 
 var (

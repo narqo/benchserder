@@ -5,6 +5,8 @@ import "time"
 type Duration struct {
 	Duration time.Duration
 	Valid    bool
+
+	XXX_unrecognized []byte `json:"-"`
 }
 
 func NewDuration(duration time.Duration) Duration {

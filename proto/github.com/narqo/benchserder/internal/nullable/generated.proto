@@ -1,0 +1,36 @@
+syntax = "proto3";
+package github.com.narqo.benchserder.internal.nullable;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+import "google/protobuf/duration.proto";
+
+option (gogoproto.protosizer_all) = true;
+option (gogoproto.sizer_all) = false;
+option go_package = "nullable";
+
+message Bool {
+	option (gogoproto.goproto_getters) = false;
+	option (gogoproto.goproto_stringer) = false;
+	option (gogoproto.typedecl) = false;
+	bool bool = 1;
+	bool valid = 2;
+	bytes xxx_unrecognized = 3 [(gogoproto.customname) = "XXX_unrecognized"];
+}
+
+message Duration {
+	option (gogoproto.goproto_getters) = false;
+	option (gogoproto.typedecl) = false;
+	google.protobuf.Duration duration = 1 [(gogoproto.nullable) = false, (gogoproto.stdduration) = true];
+	bool valid = 2;
+	bytes xxx_unrecognized = 3 [(gogoproto.customname) = "XXX_unrecognized"];
+}
+
+message Int {
+	option (gogoproto.goproto_getters) = false;
+	option (gogoproto.goproto_stringer) = false;
+	option (gogoproto.typedecl) = false;
+	int64 int = 1 [(gogoproto.casttype) = "int"];
+	bool valid = 2;
+	bytes xxx_unrecognized = 3 [(gogoproto.customname) = "XXX_unrecognized"];
+}
+

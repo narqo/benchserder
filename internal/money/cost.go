@@ -49,6 +49,8 @@ func (cost CostType) String() string {
 type Cost struct {
 	Amount   Amount
 	CostType CostType
+
+	XXX_unrecognized []byte `json:"-"`
 }
 
 func NewCost(amount Amount, costType CostType) Cost {

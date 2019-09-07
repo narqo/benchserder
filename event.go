@@ -5,7 +5,6 @@ import (
 
 	"github.com/narqo/benchserder/internal/callback"
 	"github.com/narqo/benchserder/internal/fraud"
-	"github.com/narqo/benchserder/internal/header"
 	"github.com/narqo/benchserder/internal/money"
 	"github.com/narqo/benchserder/internal/nullable"
 	"github.com/narqo/benchserder/internal/tokens"
@@ -59,11 +58,13 @@ type Event struct {
 	ImpressionBased    bool
 	DeviceReattributed bool
 
-	headerData      *header.Data
-	eventCount      int
-	lastEventCount  int
-	sessionCount    int
-	subsessionCount int
-	sessionLength   int
-	timeSpent       int
+	//headerData      *header.Data
+	//eventCount      int
+	//lastEventCount  int
+	//sessionCount    int
+	//subsessionCount int
+	//sessionLength   int
+	//timeSpent       int
+
+	XXX_unrecognized []byte `json:"-"`
 }

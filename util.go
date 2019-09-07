@@ -7,13 +7,14 @@ import (
 	"testing"
 
 	"github.com/fxamacker/cbor"
+	proto "github.com/golang/protobuf/proto"
 	"github.com/mailru/easyjson"
 	"github.com/ugorji/go/codec"
 	"github.com/vmihailenco/msgpack"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-type marshanFunc func(interface{}) ([]byte, error)
+type marshalFunc func(interface{}) ([]byte, error)
 
 type unmarshalFunc func([]byte, interface{}) error
 
@@ -87,6 +88,14 @@ func marshalBSON(v interface{}) ([]byte, error) {
 
 func unmarshalBSON(data []byte, v interface{}) error {
 	return bson.Unmarshal(data, v)
+}
+
+func marshalGogoProto(v interface{}) ([]byte, error) {
+	return v.(proto.Marshaler).Marshal()
+}
+
+func unmarshalGogoProto(data []byte, v interface{}) error {
+	return v.(proto.Unmarshaler).Unmarshal(data)
 }
 
 func readFile(tf string) ([]byte, error) {

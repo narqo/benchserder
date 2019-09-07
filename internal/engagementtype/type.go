@@ -2,7 +2,6 @@ package engagementtype
 
 import "log"
 
-//proteus:generate
 type Type int
 
 // types who's index is lower than that are for tests, or legacy types

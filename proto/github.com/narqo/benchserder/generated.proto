@@ -1,0 +1,53 @@
+syntax = "proto3";
+package github.com.narqo.benchserder;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+import "github.com/narqo/benchserder/internal/tokens/generated.proto";
+import "google/protobuf/timestamp.proto";
+import "github.com/narqo/benchserder/internal/nullable/generated.proto";
+import "github.com/narqo/benchserder/internal/money/generated.proto";
+import "github.com/narqo/benchserder/internal/fraud/generated.proto";
+import "github.com/narqo/benchserder/internal/callback/generated.proto";
+
+option (gogoproto.protosizer_all) = true;
+option (gogoproto.sizer_all) = false;
+option go_package = "benchserder";
+
+// easyjson:json
+message Event {
+	option (gogoproto.goproto_getters) = false;
+	option (gogoproto.typedecl) = false;
+	string app_token = 1 [(gogoproto.casttype) = "github.com/narqo/benchserder/internal/tokens.AppToken"];
+	string tracker = 2 [(gogoproto.casttype) = "github.com/narqo/benchserder/internal/tokens.TrackerToken"];
+	string adid = 3 [(gogoproto.casttype) = "github.com/narqo/benchserder/internal/tokens.Adid"];
+	string facebook_attribution_id = 4;
+	string facebook_anon_id = 5;
+	string tracking_enabled = 6;
+	google.protobuf.Timestamp click_time = 7 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
+	google.protobuf.Timestamp first_session_time = 8 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
+	google.protobuf.Timestamp last_session_time = 9 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
+	google.protobuf.Timestamp last_event_time = 10 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
+	google.protobuf.Timestamp last_revenue_time = 11 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
+	google.protobuf.Timestamp created_at = 12 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
+	google.protobuf.Timestamp received_at = 13 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
+	google.protobuf.Timestamp install_time = 14 [(gogoproto.nullable) = false, (gogoproto.stdtime) = true];
+	string install_tracker = 15 [(gogoproto.casttype) = "github.com/narqo/benchserder/internal/tokens.TrackerToken"];
+	string install_country = 16;
+	github.com.narqo.benchserder.internal.nullable.Bool install_impression_based = 17 [(gogoproto.nullable) = false];
+	string event_token = 18;
+	github.com.narqo.benchserder.internal.money.Amount revenue = 19 [(gogoproto.nullable) = false];
+	string device_type = 20;
+	string environment = 21;
+	github.com.narqo.benchserder.internal.nullable.Int null_sdk_level = 22 [(gogoproto.nullable) = false];
+	int64 zone_offset = 23 [(gogoproto.casttype) = "int"];
+	github.com.narqo.benchserder.internal.fraud.Kind fraud_kind = 24;
+	string pingback_url = 25;
+	github.com.narqo.benchserder.internal.callback.Data callback_data = 26;
+	string first_os_name = 27;
+	string first_country = 28;
+	string first_device_type = 29;
+	bool impression_based = 30;
+	bool device_reattributed = 31;
+	bytes xxx_unrecognized = 32 [(gogoproto.customname) = "XXX_unrecognized"];
+}
+

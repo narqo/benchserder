@@ -1,7 +1,7 @@
-// Go support for Protocol Buffers - Google's data interchange format
+// Protocol Buffers for Go with Gadgets
 //
-// Copyright 2010 The Go Authors.  All rights reserved.
-// https://github.com/golang/protobuf
+// Copyright (c) 2016, The GoGo Authors. All rights reserved.
+// http://github.com/gogo/protobuf
 //
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are
@@ -13,9 +13,6 @@
 // copyright notice, this list of conditions and the following disclaimer
 // in the documentation and/or other materials provided with the
 // distribution.
-//     * Neither the name of Google Inc. nor the names of its
-// contributors may be used to endorse or promote products derived from
-// this software without specific prior written permission.
 //
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 // "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -29,29 +26,69 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-// protoc-gen-go is a plugin for the Google protocol buffer compiler to generate
-// Go code.  Run it by building this program and putting it in your path with
-// the name
-// 	protoc-gen-gogo
-// That word 'gogo' at the end becomes part of the option string set for the
-// protocol compiler, so once the protocol compiler (protoc) is installed
-// you can run
-// 	protoc --gogo_out=output_directory input_directory/file.proto
-// to generate Go bindings for the protocol defined by file.proto.
-// With that input, the output will be written to
-// 	output_directory/file.pb.go
-//
-// The generated code is documented in the package comment for
-// the library.
-//
-// See the README and documentation for protocol buffers to learn more:
-// 	https://developers.google.com/protocol-buffers/
-package main
+package types
 
 import (
-	"github.com/gogo/protobuf/vanity/command"
+	"time"
 )
 
-func main() {
-	command.Write(command.Generate(command.Read()))
+func NewPopulatedTimestamp(r interface {
+	Int63() int64
+}, easy bool) *Timestamp {
+	this := &Timestamp{}
+	ns := int64(r.Int63())
+	this.Seconds = ns / 1e9
+	this.Nanos = int32(ns % 1e9)
+	return this
+}
+
+func (ts *Timestamp) String() string {
+	return TimestampString(ts)
+}
+
+func NewPopulatedStdTime(r interface {
+	Int63() int64
+}, easy bool) *time.Time {
+	timestamp := NewPopulatedTimestamp(r, easy)
+	t, err := TimestampFromProto(timestamp)
+	if err != nil {
+		return nil
+	}
+	return &t
+}
+
+func SizeOfStdTime(t time.Time) int {
+	ts, err := TimestampProto(t)
+	if err != nil {
+		return 0
+	}
+	return ts.Size()
+}
+
+func StdTimeMarshal(t time.Time) ([]byte, error) {
+	size := SizeOfStdTime(t)
+	buf := make([]byte, size)
+	_, err := StdTimeMarshalTo(t, buf)
+	return buf, err
+}
+
+func StdTimeMarshalTo(t time.Time, data []byte) (int, error) {
+	ts, err := TimestampProto(t)
+	if err != nil {
+		return 0, err
+	}
+	return ts.MarshalTo(data)
+}
+
+func StdTimeUnmarshal(t *time.Time, data []byte) error {
+	ts := &Timestamp{}
+	if err := ts.Unmarshal(data); err != nil {
+		return err
+	}
+	tt, err := TimestampFromProto(ts)
+	if err != nil {
+		return err
+	}
+	*t = tt
+	return nil
 }
