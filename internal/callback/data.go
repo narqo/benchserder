@@ -13,7 +13,6 @@ import (
 )
 
 //easyjson:json
-//proteus:generate
 type Data struct {
 	TermsSigned        bool                  `json:",omitempty"`
 	ReferenceTag       string                `json:"ReferenceTag,omitempty"`

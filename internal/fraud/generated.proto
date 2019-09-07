@@ -1,0 +1,26 @@
+syntax = "proto3";
+package github.com.narqo.benchserder.internal.fraud;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option (gogoproto.protosizer_all) = true;
+option (gogoproto.sizer_all) = false;
+option go_package = "fraud";
+
+enum Kind {
+	option (gogoproto.enumdecl) = false;
+	option (gogoproto.goproto_enum_prefix) = false;
+	option (gogoproto.goproto_enum_stringer) = false;
+	NONE = 0 [(gogoproto.enumvalue_customname) = "None"];
+	// device level fraud, usually detected based on the install request and remembered forever
+	ANONYMOUS_TRAFFIC = 1 [(gogoproto.enumvalue_customname) = "AnonymousTraffic"];
+	DEPRECATED_SDK_VERSION = 2 [(gogoproto.enumvalue_customname) = "DeprecatedSdkVersion"];
+	INVALID_SIGNATURE = 3 [(gogoproto.enumvalue_customname) = "InvalidSignature"];
+	UNVERIFIABLE_OS_VERSION = 4 [(gogoproto.enumvalue_customname) = "UnverifiableOsVersion"];
+	MALFORMED_ADVERTISING_ID = 5 [(gogoproto.enumvalue_customname) = "MalformedAdvertisingId"];
+	// engagement fraud, the device is fine, but we don't trust the engagement we found
+	TOO_MANY_ENGAGEMENTS = 6 [(gogoproto.enumvalue_customname) = "TooManyEngagements"];
+	DISTRIBUTION_OUTLIER = 7 [(gogoproto.enumvalue_customname) = "DistributionOutlier"];
+	ENGAGEMENT_INJECTION = 8 [(gogoproto.enumvalue_customname) = "EngagementInjection"];
+}
+

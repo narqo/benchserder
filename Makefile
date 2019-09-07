@@ -25,7 +25,7 @@ generate-proto: $(PROTO_FILES:.proto=.pb.go)
 
 %.pb.go: %.proto
 	$(PROTOC) \
-		-I ./:vendor/ \
+		-I ./:../../../:vendor/ \
 		--gogo_out=. $(<)
 
 .PHONY: generate-proto-src

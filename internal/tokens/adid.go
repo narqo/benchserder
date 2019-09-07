@@ -1,6 +1,5 @@
 package tokens
 
-//proteus:generate
 type Adid string
 
 type AdidMap map[AppToken]Adid // appToken -> adid

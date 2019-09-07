@@ -7,6 +7,7 @@ require (
 	github.com/fxamacker/cbor v0.3.0
 	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/gogo/protobuf v1.3.0
+	github.com/golang/protobuf v1.3.1
 	github.com/google/go-cmp v0.3.1 // indirect
 	github.com/mailru/easyjson v0.0.0-20190626092158-b2ccc519800e
 	github.com/mattn/go-colorable v0.1.2 // indirect

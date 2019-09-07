@@ -46,7 +46,6 @@ func (cost CostType) String() string {
 
 // represents costs that could be associated with an incoming activity
 //easyjson:json
-//proteus:generate
 type Cost struct {
 	Amount   Amount
 	CostType CostType

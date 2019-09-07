@@ -6,7 +6,6 @@ import (
 )
 
 //easyjson:json
-//proteus:generate
 type Amount struct {
 	// original values from the SDK
 	OriginalAmount   float64

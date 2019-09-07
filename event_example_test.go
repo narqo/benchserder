@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+
+	"github.com/gogo/protobuf/proto"
 )
 
 func ExampleEvent_MarshalUnmarshal() {
@@ -20,7 +22,7 @@ func ExampleEvent_MarshalUnmarshal() {
 		c1Data, _ := marshalCodecCBOR(event)
 		c2Data, _ := marshalFxamackerCBOR(event)
 		bData, _ := marshalBSON(event)
-		//pbData, _ := marshalEventPB(event)
+		pbData, err := marshalProto(event)
 
 		fmt.Fprintf(os.Stdout, "source %s\n", tf)
 		fmt.Fprintf(os.Stdout, "--- json:\t\t %d\n", len(jsonData))
@@ -29,10 +31,14 @@ func ExampleEvent_MarshalUnmarshal() {
 		fmt.Fprintf(os.Stdout, "--- codec/cbor:\t\t %d\n", len(c1Data))
 		fmt.Fprintf(os.Stdout, "--- fxamacker/cbor:\t %d\n", len(c2Data))
 		fmt.Fprintf(os.Stdout, "--- bson:\t\t %d\n", len(bData))
-		//fmt.Fprintf(os.Stdout, "--- proto:\t\t %d\n", len(pbData))
+		fmt.Fprintf(os.Stdout, "--- proto:\t\t %d\n", len(pbData))
 
 		// Output:
 	}
+}
+
+func marshalProto(event Event) ([]byte, error) {
+	return proto.Marshal(&event)
 }
 
 /*

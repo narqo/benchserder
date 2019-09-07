@@ -1,0 +1,86 @@
+syntax = "proto3";
+package github.com.narqo.benchserder.internal.engagementtype;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option (gogoproto.protosizer_all) = false;
+option (gogoproto.sizer_all) = false;
+option go_package = "engagementtype";
+
+enum Source {
+	option (gogoproto.enumdecl) = false;
+	option (gogoproto.goproto_enum_prefix) = false;
+	option (gogoproto.goproto_enum_stringer) = false;
+	FROM_UNKNOWN = 0 [(gogoproto.enumvalue_customname) = "FromUnknown"];
+	FROM_IP_LIST = 1 [(gogoproto.enumvalue_customname) = "FromIpList"];
+	FROM_MAPPED_DTAG = 2 [(gogoproto.enumvalue_customname) = "FromMappedDtag"];
+	FROM_REFERRER = 3 [(gogoproto.enumvalue_customname) = "FromReferrer"];
+	FROM_SDK_REFTAG = 4 [(gogoproto.enumvalue_customname) = "FromSdkReftag"];
+	FROM_SDK_DEEPLINK = 5 [(gogoproto.enumvalue_customname) = "FromSdkDeeplink"];
+	FROM_SDK_IAD = 6 [(gogoproto.enumvalue_customname) = "FromSdkIad"];
+	FROM_FACEBOOK = 7 [(gogoproto.enumvalue_customname) = "FromFacebook"];
+	FROM_GOOGLE = 8 [(gogoproto.enumvalue_customname) = "FromGoogle"];
+	FROM_ADWORDS = 9 [(gogoproto.enumvalue_customname) = "FromAdwords"];
+	FROM_TWITTER = 10 [(gogoproto.enumvalue_customname) = "FromTwitter"];
+	FROM_DOUBLE_CLICK = 11 [(gogoproto.enumvalue_customname) = "FromDoubleClick"];
+	FROM_YAHOO_JAPAN = 12 [(gogoproto.enumvalue_customname) = "FromYahooJapan"];
+	FROM_SNAPCHAT = 13 [(gogoproto.enumvalue_customname) = "FromSnapchat"];
+	FROM_EXTERNAL_CLICK_ID = 14 [(gogoproto.enumvalue_customname) = "FromExternalClickId"];
+	FROM_YAHOO_GEMINI = 15 [(gogoproto.enumvalue_customname) = "FromYahooGemini"];
+	FROM_KING = 16 [(gogoproto.enumvalue_customname) = "FromKing"];
+	FROM_TENCENT = 17 [(gogoproto.enumvalue_customname) = "FromTencent"];
+	FROM_GOOGLE_MARKETING_PLATFORM = 18 [(gogoproto.enumvalue_customname) = "FromGoogleMarketingPlatform"];
+	FROM_SDK_IAD3 = 19 [(gogoproto.enumvalue_customname) = "FromSdkIad3"];
+	FROM_SDK_APPLE_SEARCH_ADS = 20 [(gogoproto.enumvalue_customname) = "FromSdkAppleSearchAds"];
+	FROM_SDK_GOOGLE_ORGANIC_SEARCH = 21 [(gogoproto.enumvalue_customname) = "FromSdkGoogleOrganicSearch"];
+	FROM_SDK_ADJUST_TRACKER = 22 [(gogoproto.enumvalue_customname) = "FromSdkAdjustTracker"];
+}
+
+enum Type {
+	option (gogoproto.enumdecl) = false;
+	option (gogoproto.goproto_enum_prefix) = false;
+	option (gogoproto.goproto_enum_stringer) = false;
+	NONE = 0 [(gogoproto.enumvalue_customname) = "None"];
+	UNKNOWN = 1 [(gogoproto.enumvalue_customname) = "Unknown"];
+	// legacy type represents types 1..10 that we used to have; it must be used in testing only
+	TEST_LEGACY_TYPE = 2 [(gogoproto.enumvalue_customname) = "TestLegacyType"];
+	// engagement types from adjust server
+	ADJUST_DTAG_CLICK = 3 [(gogoproto.enumvalue_customname) = "AdjustDtagClick"];
+	ADJUST_DTAG_IMPRESSION = 4 [(gogoproto.enumvalue_customname) = "AdjustDtagImpression"];
+	ADJUST_DTAG_FALLBACK_CLICK = 5 [(gogoproto.enumvalue_customname) = "AdjustDtagFallbackClick"];
+	ADJUST_IP_CLICK = 6 [(gogoproto.enumvalue_customname) = "AdjustIpClick"];
+	ADJUST_IP_IMPRESSION = 7 [(gogoproto.enumvalue_customname) = "AdjustIpImpression"];
+	ADJUST_IP_FALLBACK_CLICK = 8 [(gogoproto.enumvalue_customname) = "AdjustIpFallbackClick"];
+	// engagement types from attribution worker apis
+	SDK_DEEPLINK_CLICK = 9 [(gogoproto.enumvalue_customname) = "SdkDeeplinkClick"];
+	SDK_REFTAG_CLICK = 10 [(gogoproto.enumvalue_customname) = "SdkReftagClick"];
+	SDK_REFTAG_FALLBACK_CLICK = 11 [(gogoproto.enumvalue_customname) = "SdkReftagFallbackClick"];
+	SDK_IAD_CLICK = 12 [(gogoproto.enumvalue_customname) = "SdkIadClick"];
+	SDK_IAD3_CLICK = 13 [(gogoproto.enumvalue_customname) = "SdkIad3Click"];
+	SDK_APPLE_SEARCH_ADS_CLICK = 14 [(gogoproto.enumvalue_customname) = "SdkAppleSearchAdsClick"];
+	SDK_GOOGLE_ORGANIC_SEARCH_CLICK = 15 [(gogoproto.enumvalue_customname) = "SdkGoogleOrganicSearchClick"];
+	SDK_PREINSTALL_FALLBACK_CLICK = 16 [(gogoproto.enumvalue_customname) = "SdkPreinstallFallbackClick"];
+	FACEBOOK_CLICK = 17 [(gogoproto.enumvalue_customname) = "FacebookClick"];
+	FACEBOOK_IMPRESSION = 18 [(gogoproto.enumvalue_customname) = "FacebookImpression"];
+	GOOGLE_CLICK = 19 [(gogoproto.enumvalue_customname) = "GoogleClick"];
+	ADWORDS_CLICK = 20 [(gogoproto.enumvalue_customname) = "AdwordsClick"];
+	ADWORDS_IMPRESSION = 21 [(gogoproto.enumvalue_customname) = "AdwordsImpression"];
+	TWITTER_CLICK = 22 [(gogoproto.enumvalue_customname) = "TwitterClick"];
+	TWITTER_IMPRESSION = 23 [(gogoproto.enumvalue_customname) = "TwitterImpression"];
+	DOUBLECLICK_CLICK = 24 [(gogoproto.enumvalue_customname) = "DoubleclickClick"];
+	DOUBLECLICK_IMPRESSION = 25 [(gogoproto.enumvalue_customname) = "DoubleclickImpression"];
+	YAHOO_JAPAN_CLICK = 26 [(gogoproto.enumvalue_customname) = "YahooJapanClick"];
+	YAHOO_GEMINI_CLICK = 27 [(gogoproto.enumvalue_customname) = "YahooGeminiClick"];
+	YAHOO_GEMINI_IMPRESSION = 28 [(gogoproto.enumvalue_customname) = "YahooGeminiImpression"];
+	SNAPCHAT_CLICK = 29 [(gogoproto.enumvalue_customname) = "SnapchatClick"];
+	SNAPCHAT_IMPRESSION = 30 [(gogoproto.enumvalue_customname) = "SnapchatImpression"];
+	EXTERNAL_CLICK_ID_CLICK = 31 [(gogoproto.enumvalue_customname) = "ExternalClickIdClick"];
+	KING_CLICK = 32 [(gogoproto.enumvalue_customname) = "KingClick"];
+	KING_IMPRESSION = 33 [(gogoproto.enumvalue_customname) = "KingImpression"];
+	REFERRER_CLICK = 34 [(gogoproto.enumvalue_customname) = "ReferrerClick"];
+	TENCENT_CLICK = 35 [(gogoproto.enumvalue_customname) = "TencentClick"];
+	TENCENT_IMPRESSION = 36 [(gogoproto.enumvalue_customname) = "TencentImpression"];
+	GOOGLE_MARKETING_PLATFORM_CLICK = 37 [(gogoproto.enumvalue_customname) = "GoogleMarketingPlatformClick"];
+	GOOGLE_MARKETING_PLATFORM_IMPRESSION = 38 [(gogoproto.enumvalue_customname) = "GoogleMarketingPlatformImpression"];
+}
+

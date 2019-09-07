@@ -18,7 +18,6 @@ const (
 
 const EmptyTrackerToken = TrackerToken("")
 
-//proteus:generate
 type TrackerToken string
 
 func init() {

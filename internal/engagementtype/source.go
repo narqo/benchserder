@@ -1,5 +1,6 @@
 package engagementtype
 
+//proteus:generate
 type Source int
 
 const (

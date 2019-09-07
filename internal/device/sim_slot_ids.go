@@ -1,7 +1,6 @@
 package device
 
 //easyjson:json
-//proteus:generate
 type SimSlotIds struct {
 	Imeis    []string
 	Meids    []string

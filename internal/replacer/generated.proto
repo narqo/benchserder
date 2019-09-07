@@ -1,0 +1,36 @@
+syntax = "proto3";
+package github.com.narqo.benchserder.internal.replacer;
+
+import "github.com/gogo/protobuf/gogoproto/gogo.proto";
+
+option (gogoproto.protosizer_all) = false;
+option (gogoproto.sizer_all) = false;
+option go_package = "replacer";
+
+enum ActivityKind {
+	option (gogoproto.enumdecl) = false;
+	option (gogoproto.goproto_enum_prefix) = false;
+	option (gogoproto.goproto_enum_stringer) = false;
+	AC_REDIRECT = 0 [(gogoproto.enumvalue_customname) = "AcRedirect"];
+	AC_SDK_CLICK = 1 [(gogoproto.enumvalue_customname) = "AcSdkClick"];
+	AC_SDK_INFO = 2 [(gogoproto.enumvalue_customname) = "AcSdkInfo"];
+	AC_CLICK = 3 [(gogoproto.enumvalue_customname) = "AcClick"];
+	AC_SAN_CLICK = 4 [(gogoproto.enumvalue_customname) = "AcSanClick"];
+	AC_IMPRESSION = 5 [(gogoproto.enumvalue_customname) = "AcImpression"];
+	AC_SAN_IMPRESSION = 6 [(gogoproto.enumvalue_customname) = "AcSanImpression"];
+	AC_INSTALL = 7 [(gogoproto.enumvalue_customname) = "AcInstall"];
+	AC_REJECTED_INSTALL = 8 [(gogoproto.enumvalue_customname) = "AcRejectedInstall"];
+	AC_SESSION = 9 [(gogoproto.enumvalue_customname) = "AcSession"];
+	AC_EVENT = 10 [(gogoproto.enumvalue_customname) = "AcEvent"];
+	AC_REATTRIBUTION = 11 [(gogoproto.enumvalue_customname) = "AcReattribution"];
+	AC_REJECTED_REATTRIBUTION = 12 [(gogoproto.enumvalue_customname) = "AcRejectedReattribution"];
+	AC_ATTRIBUTION_UPDATE = 13 [(gogoproto.enumvalue_customname) = "AcAttributionUpdate"];
+	AC_UNINSTALL = 14 [(gogoproto.enumvalue_customname) = "AcUninstall"];
+	AC_REINSTALL = 15 [(gogoproto.enumvalue_customname) = "AcReinstall"];
+	AC_REATTRIBUTION_REINSTALL = 16 [(gogoproto.enumvalue_customname) = "AcReattributionReinstall"];
+	AC_OPT_OUT = 17 [(gogoproto.enumvalue_customname) = "AcOptOut"];
+	AC_GDPR_FORGET_DEVICE = 18 [(gogoproto.enumvalue_customname) = "AcGdprForgetDevice"];
+	AC_AD_REVENUE = 19 [(gogoproto.enumvalue_customname) = "AcAdRevenue"];
+	AC_COST_UPDATE = 20 [(gogoproto.enumvalue_customname) = "AcCostUpdate"];
+}
+

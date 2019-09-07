@@ -4,7 +4,6 @@ import (
 	"github.com/narqo/benchserder/internal/nullable"
 )
 
-//proteus:generate
 type Data struct {
 	// header data might be invalid if we parsed some headers and recognized
 	// bots or other known malformed user agents. this flag is used to redirect

@@ -1,6 +1,5 @@
 package tokens
 
-//proteus:generate
 type AppToken string
 
 func (appToken AppToken) IsEmpty() bool {
