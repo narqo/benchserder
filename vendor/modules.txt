@@ -1,4 +1,4 @@
-# github.com/davecgh/go-spew v1.1.0
+# github.com/davecgh/go-spew v1.1.1
 github.com/davecgh/go-spew/spew
 # github.com/fatih/color v1.7.0
 github.com/fatih/color
@@ -31,27 +31,25 @@ github.com/gogo/protobuf/protoc-gen-gogo/generator
 github.com/gogo/protobuf/protoc-gen-gogo/generator/internal/remap
 github.com/gogo/protobuf/protoc-gen-gogo/grpc
 github.com/gogo/protobuf/protoc-gen-gogo/plugin
-github.com/gogo/protobuf/sortkeys
-github.com/gogo/protobuf/types
 github.com/gogo/protobuf/vanity
 github.com/gogo/protobuf/vanity/command
 # github.com/golang/protobuf v1.3.1
 github.com/golang/protobuf/proto
-github.com/golang/protobuf/ptypes/duration
-github.com/golang/protobuf/ptypes/timestamp
 # github.com/mailru/easyjson v0.0.0-20190626092158-b2ccc519800e
 github.com/mailru/easyjson
+github.com/mailru/easyjson/bootstrap
 github.com/mailru/easyjson/buffer
+github.com/mailru/easyjson/easyjson
+github.com/mailru/easyjson/gen
 github.com/mailru/easyjson/jlexer
 github.com/mailru/easyjson/jwriter
+github.com/mailru/easyjson/parser
 # github.com/mattn/go-colorable v0.1.2
 github.com/mattn/go-colorable
 # github.com/mattn/go-isatty v0.0.9
 github.com/mattn/go-isatty
 # github.com/pmezard/go-difflib v1.0.0
 github.com/pmezard/go-difflib/difflib
-# github.com/src-d/proteus v1.3.3
-github.com/src-d/proteus
 # github.com/stretchr/testify v1.4.0
 github.com/stretchr/testify/assert
 github.com/stretchr/testify/require
@@ -67,7 +65,7 @@ go.mongodb.org/mongo-driver/bson/bsonrw
 go.mongodb.org/mongo-driver/bson/bsontype
 go.mongodb.org/mongo-driver/bson/primitive
 go.mongodb.org/mongo-driver/x/bsonx/bsoncore
-# golang.org/x/net v0.0.0-20190603091049-60506f45cf65
+# golang.org/x/net v0.0.0-20190812203447-cdfb69ac37fc
 golang.org/x/net/context
 # golang.org/x/sys v0.0.0-20190813064441-fde4db37ae7a
 golang.org/x/sys/unix
@@ -90,10 +88,14 @@ google.golang.org/appengine/internal/remote_api
 # gopkg.in/src-d/go-parse-utils.v1 v1.1.2
 gopkg.in/src-d/go-parse-utils.v1
 # gopkg.in/src-d/proteus.v1 v1.3.3
+gopkg.in/src-d/proteus.v1
+gopkg.in/src-d/proteus.v1/cli/proteus
 gopkg.in/src-d/proteus.v1/protobuf
 gopkg.in/src-d/proteus.v1/report
 gopkg.in/src-d/proteus.v1/resolver
 gopkg.in/src-d/proteus.v1/rpc
 gopkg.in/src-d/proteus.v1/scanner
+# gopkg.in/urfave/cli.v1 v1.0.0-00010101000000-000000000000 => github.com/urfave/cli v1.21.0
+gopkg.in/urfave/cli.v1
 # gopkg.in/yaml.v2 v2.2.2
 gopkg.in/yaml.v2

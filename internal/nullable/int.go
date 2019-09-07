@@ -2,7 +2,6 @@ package nullable
 
 import "strconv"
 
-//proteus:generate
 type Int struct {
 	Int   int
 	Valid bool

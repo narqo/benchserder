@@ -2,7 +2,6 @@ package nullable
 
 import "time"
 
-//proteus:generate
 type Duration struct {
 	Duration time.Duration
 	Valid    bool

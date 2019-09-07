@@ -5,6 +5,6 @@ package benchserder
 import (
 	_ "github.com/gogo/protobuf/gogoproto"
 	_ "github.com/gogo/protobuf/protoc-gen-gogo"
-	_ "github.com/src-d/proteus"
-	_ "github.com/mailru/easyjson"
+	_ "github.com/mailru/easyjson/easyjson"
+	_ "gopkg.in/src-d/proteus.v1/cli/proteus"
 )

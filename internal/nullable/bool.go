@@ -2,7 +2,6 @@ package nullable
 
 import "database/sql"
 
-//proteus:generate
 type Bool struct {
 	Bool  bool
 	Valid bool
