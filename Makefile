@@ -27,7 +27,7 @@ generate-proto:
 	for proto_file in $(PROTO_FILES); do \
 		$(PROTOC) \
 			-I proto:vendor \
-			--gofast_out=../../../ \
+			--gogofaster_out=../../../ \
 			$$proto_file; \
 	done
 
@@ -54,6 +54,7 @@ bootstrap:
 	GO111MODULE=off GOBIN=$(BINDIR) $(GO) install ./vendor/github.com/mailru/easyjson/...
 	GO111MODULE=off GOBIN=$(BINDIR) $(GO) install ./vendor/gopkg.in/src-d/proteus.v1/...
 	GO111MODULE=off GOBIN=$(BINDIR) $(GO) install ./vendor/github.com/gogo/protobuf/protoc-gen-gofast/...
+	GO111MODULE=off GOBIN=$(BINDIR) $(GO) install ./vendor/github.com/gogo/protobuf/protoc-gen-gogofaster/...
 
 .PHONY: clean
 clean:
