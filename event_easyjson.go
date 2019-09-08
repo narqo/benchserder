@@ -13,7 +13,6 @@ import (
 	fraud "github.com/narqo/benchserder/internal/fraud"
 	money "github.com/narqo/benchserder/internal/money"
 	nullable "github.com/narqo/benchserder/internal/nullable"
-	tokens "github.com/narqo/benchserder/internal/tokens"
 	time "time"
 )
 
@@ -45,11 +44,11 @@ func easyjsonF642ad3eDecodeGithubComNarqoBenchserder(in *jlexer.Lexer, out *Even
 		}
 		switch key {
 		case "AppToken":
-			out.AppToken = tokens.AppToken(in.String())
+			out.AppToken = string(in.String())
 		case "Tracker":
-			out.Tracker = tokens.TrackerToken(in.String())
+			out.Tracker = string(in.String())
 		case "Adid":
-			out.Adid = tokens.Adid(in.String())
+			out.Adid = string(in.String())
 		case "FacebookAttributionId":
 			out.FacebookAttributionId = string(in.String())
 		case "FacebookAnonId":
@@ -89,7 +88,7 @@ func easyjsonF642ad3eDecodeGithubComNarqoBenchserder(in *jlexer.Lexer, out *Even
 				in.AddError((out.InstallTime).UnmarshalJSON(data))
 			}
 		case "InstallTracker":
-			out.InstallTracker = tokens.TrackerToken(in.String())
+			out.InstallTracker = string(in.String())
 		case "InstallCountry":
 			out.InstallCountry = string(in.String())
 		case "InstallImpressionBased":
@@ -97,7 +96,7 @@ func easyjsonF642ad3eDecodeGithubComNarqoBenchserder(in *jlexer.Lexer, out *Even
 		case "EventToken":
 			out.EventToken = string(in.String())
 		case "RevenueData":
-			easyjsonF642ad3eDecodeGithubComNarqoBenchserderInternalMoney(in, &out.Revenue)
+			easyjsonF642ad3eDecodeGithubComNarqoBenchserderInternalMoney(in, &out.RevenueData)
 		case "DeviceType":
 			out.DeviceType = string(in.String())
 		case "Environment":
@@ -237,7 +236,7 @@ func easyjsonF642ad3eEncodeGithubComNarqoBenchserder(out *jwriter.Writer, in Eve
 	{
 		const prefix string = ",\"RevenueData\":"
 		out.RawString(prefix)
-		easyjsonF642ad3eEncodeGithubComNarqoBenchserderInternalMoney(out, in.Revenue)
+		easyjsonF642ad3eEncodeGithubComNarqoBenchserderInternalMoney(out, in.RevenueData)
 	}
 	{
 		const prefix string = ",\"DeviceType\":"
@@ -341,17 +340,17 @@ func easyjsonF642ad3eDecodeGithubComNarqoBenchserderInternalCallback(in *jlexer.
 		case "EngagementType":
 			out.EngagementType = engagementtype.Type(in.Int())
 		case "Tracker":
-			out.Tracker = tokens.TrackerToken(in.String())
+			out.Tracker = string(in.String())
 		case "InstallTracker":
-			out.InstallTracker = tokens.TrackerToken(in.String())
+			out.InstallTracker = string(in.String())
 		case "LastTracker":
-			out.LastTracker = tokens.TrackerToken(in.String())
+			out.LastTracker = string(in.String())
 		case "OutdatedTracker":
-			out.OutdatedTracker = tokens.TrackerToken(in.String())
+			out.OutdatedTracker = string(in.String())
 		case "AppToken":
-			out.AppToken = tokens.AppToken(in.String())
+			out.AppToken = string(in.String())
 		case "Adid":
-			out.Adid = tokens.Adid(in.String())
+			out.Adid = string(in.String())
 		case "OsName":
 			out.OsName = string(in.String())
 		case "OsVersion":
@@ -542,7 +541,7 @@ func easyjsonF642ad3eDecodeGithubComNarqoBenchserderInternalCallback(in *jlexer.
 			} else {
 				in.Delim('{')
 				if !in.IsDelim('}') {
-					out.PartnerParameters = make(callback.Parameters)
+					out.PartnerParameters = make(map[string]string)
 				} else {
 					out.PartnerParameters = nil
 				}
@@ -562,7 +561,7 @@ func easyjsonF642ad3eDecodeGithubComNarqoBenchserderInternalCallback(in *jlexer.
 			} else {
 				in.Delim('{')
 				if !in.IsDelim('}') {
-					out.PartnerSdkParams = make(callback.Parameters)
+					out.PartnerSdkParams = make(map[string]string)
 				} else {
 					out.PartnerSdkParams = nil
 				}
@@ -582,7 +581,7 @@ func easyjsonF642ad3eDecodeGithubComNarqoBenchserderInternalCallback(in *jlexer.
 			} else {
 				in.Delim('{')
 				if !in.IsDelim('}') {
-					out.PublisherParams = make(callback.Parameters)
+					out.PublisherParams = make(map[string]string)
 				} else {
 					out.PublisherParams = nil
 				}
@@ -602,7 +601,7 @@ func easyjsonF642ad3eDecodeGithubComNarqoBenchserderInternalCallback(in *jlexer.
 			} else {
 				in.Delim('{')
 				if !in.IsDelim('}') {
-					out.DynamicCallbackParameters = make(callback.Parameters)
+					out.DynamicCallbackParameters = make(map[string]string)
 				} else {
 					out.DynamicCallbackParameters = nil
 				}
@@ -622,7 +621,7 @@ func easyjsonF642ad3eDecodeGithubComNarqoBenchserderInternalCallback(in *jlexer.
 			} else {
 				in.Delim('{')
 				if !in.IsDelim('}') {
-					out.ApiPartnerParams = make(callback.Parameters)
+					out.ApiPartnerParams = make(map[string]string)
 				} else {
 					out.ApiPartnerParams = nil
 				}

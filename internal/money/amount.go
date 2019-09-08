@@ -17,8 +17,6 @@ type Amount struct {
 	// converted to reporting currency as per app setting
 	ReportingAmount   float64
 	ReportingCurrency string
-
-	XXX_unrecognized []byte `json:"-"`
 }
 
 func (amount Amount) String() string {

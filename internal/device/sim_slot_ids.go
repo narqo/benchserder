@@ -5,8 +5,6 @@ type SimSlotIds struct {
 	Imeis    []string
 	Meids    []string
 	DeviceId string
-
-	XXX_unrecognized []byte `json:"-"`
 }
 
 // IsDefined implements easyjson.Optional to support "omitempty" json tag.

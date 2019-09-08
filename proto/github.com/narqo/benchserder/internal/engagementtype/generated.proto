@@ -7,32 +7,3 @@ option (gogoproto.protosizer_all) = true;
 option (gogoproto.sizer_all) = false;
 option go_package = "engagementtype";
 
-enum Source {
-	option (gogoproto.enumdecl) = false;
-	option (gogoproto.goproto_enum_prefix) = false;
-	option (gogoproto.goproto_enum_stringer) = false;
-	FROM_UNKNOWN = 0 [(gogoproto.enumvalue_customname) = "FromUnknown"];
-	FROM_IP_LIST = 1 [(gogoproto.enumvalue_customname) = "FromIpList"];
-	FROM_MAPPED_DTAG = 2 [(gogoproto.enumvalue_customname) = "FromMappedDtag"];
-	FROM_REFERRER = 3 [(gogoproto.enumvalue_customname) = "FromReferrer"];
-	FROM_SDK_REFTAG = 4 [(gogoproto.enumvalue_customname) = "FromSdkReftag"];
-	FROM_SDK_DEEPLINK = 5 [(gogoproto.enumvalue_customname) = "FromSdkDeeplink"];
-	FROM_SDK_IAD = 6 [(gogoproto.enumvalue_customname) = "FromSdkIad"];
-	FROM_FACEBOOK = 7 [(gogoproto.enumvalue_customname) = "FromFacebook"];
-	FROM_GOOGLE = 8 [(gogoproto.enumvalue_customname) = "FromGoogle"];
-	FROM_ADWORDS = 9 [(gogoproto.enumvalue_customname) = "FromAdwords"];
-	FROM_TWITTER = 10 [(gogoproto.enumvalue_customname) = "FromTwitter"];
-	FROM_DOUBLE_CLICK = 11 [(gogoproto.enumvalue_customname) = "FromDoubleClick"];
-	FROM_YAHOO_JAPAN = 12 [(gogoproto.enumvalue_customname) = "FromYahooJapan"];
-	FROM_SNAPCHAT = 13 [(gogoproto.enumvalue_customname) = "FromSnapchat"];
-	FROM_EXTERNAL_CLICK_ID = 14 [(gogoproto.enumvalue_customname) = "FromExternalClickId"];
-	FROM_YAHOO_GEMINI = 15 [(gogoproto.enumvalue_customname) = "FromYahooGemini"];
-	FROM_KING = 16 [(gogoproto.enumvalue_customname) = "FromKing"];
-	FROM_TENCENT = 17 [(gogoproto.enumvalue_customname) = "FromTencent"];
-	FROM_GOOGLE_MARKETING_PLATFORM = 18 [(gogoproto.enumvalue_customname) = "FromGoogleMarketingPlatform"];
-	FROM_SDK_IAD3 = 19 [(gogoproto.enumvalue_customname) = "FromSdkIad3"];
-	FROM_SDK_APPLE_SEARCH_ADS = 20 [(gogoproto.enumvalue_customname) = "FromSdkAppleSearchAds"];
-	FROM_SDK_GOOGLE_ORGANIC_SEARCH = 21 [(gogoproto.enumvalue_customname) = "FromSdkGoogleOrganicSearch"];
-	FROM_SDK_ADJUST_TRACKER = 22 [(gogoproto.enumvalue_customname) = "FromSdkAdjustTracker"];
-}
-

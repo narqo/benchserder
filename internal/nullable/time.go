@@ -8,8 +8,6 @@ import (
 type Time struct {
 	Time  time.Time
 	Valid bool // Valid is true if Time is not null
-
-	XXX_unrecognized []byte `json:"-"`
 }
 
 func NewTime(value time.Time) Time {

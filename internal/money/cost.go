@@ -49,43 +49,6 @@ func (cost CostType) String() string {
 type Cost struct {
 	Amount   Amount
 	CostType CostType
-
-	XXX_unrecognized []byte `json:"-"`
-}
-
-func NewCost(amount Amount, costType CostType) Cost {
-	if costType == CostNone {
-		return Cost{}
-	}
-
-	if amount.IsEmpty() {
-		return Cost{}
-	}
-
-	return Cost{Amount: amount, CostType: costType}
-}
-
-func (cost Cost) CostPerMille() Amount {
-	return cost.getAmountIfSameType(CostPerMille)
-}
-
-func (cost Cost) CostPerImpression() Amount {
-	return cost.getAmountIfSameType(CostPerMille).Scale(1e-3)
-}
-
-func (cost Cost) CostPerClick() Amount {
-	return cost.getAmountIfSameType(CostPerClick)
-}
-
-func (cost Cost) CostPerInstall() Amount {
-	return cost.getAmountIfSameType(CostPerInstall)
-}
-
-func (cost Cost) getAmountIfSameType(costType CostType) Amount {
-	if cost.CostType == costType {
-		return cost.Amount
-	}
-	return Amount{}
 }
 
 // IsDefined implements easyjson.Optional to support "omitempty" json tag.

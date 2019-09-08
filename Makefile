@@ -44,8 +44,6 @@ generate-proto-src:
 			-p $(PKG)/internal/fraud \
 			-p $(PKG)/internal/money \
 			-p $(PKG)/internal/nullable \
-			-p $(PKG)/internal/replacer \
-			-p $(PKG)/internal/tokens \
 			-f proto \
 			--verbose
 

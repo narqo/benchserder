@@ -8,7 +8,6 @@ import (
 	"github.com/narqo/benchserder/internal/fraud"
 	"github.com/narqo/benchserder/internal/money"
 	"github.com/narqo/benchserder/internal/nullable"
-	"github.com/narqo/benchserder/internal/tokens"
 )
 
 //easyjson:json
@@ -16,12 +15,12 @@ type Data struct {
 	TermsSigned        bool                `json:",omitempty"`
 	ReferenceTag       string              `json:"ReferenceTag,omitempty"`
 	EngagementType     engagementtype.Type `json:",omitempty"`
-	Tracker            tokens.TrackerToken `json:",omitempty"` // required
-	InstallTracker     tokens.TrackerToken `json:",omitempty"`
-	LastTracker        tokens.TrackerToken `json:",omitempty"`
-	OutdatedTracker    tokens.TrackerToken `json:",omitempty"`
-	AppToken           tokens.AppToken     `json:",omitempty"`
-	Adid               tokens.Adid         `json:",omitempty"`
+	Tracker            string              `json:",omitempty"` // required
+	InstallTracker     string              `json:",omitempty"`
+	LastTracker        string              `json:",omitempty"`
+	OutdatedTracker    string              `json:",omitempty"`
+	AppToken           string              `json:",omitempty"`
+	Adid               string              `json:",omitempty"`
 	OsName             string              `json:",omitempty"`
 	OsVersion          string              `json:",omitempty"`
 	OsBuild            string              `json:",omitempty"`
@@ -73,7 +72,7 @@ type Data struct {
 	ZoneOffset         nullable.Int        `json:",omitempty"`
 	ClickLabel         string              `json:",omitempty"`
 	UserAgent          string              `json:",omitempty"`
-	//ActivityKind       replacer.ActivityKind `json:",omitempty"`
+	//ActivityKind       replacer.ActivityKind `json:",omitempty"` // protobuf can't do string enums
 	ActivityKind    string       `json:",omitempty"`
 	Deeplink        string       `json:",omitempty"`
 	SearchTerm      string       `json:",omitempty"`
@@ -111,11 +110,11 @@ type Data struct {
 	InactiveUserDefinition         nullable.Duration `json:",omitempty"`
 
 	// Make sure to update Copy() when adding new maps!
-	PartnerParameters         Parameters `json:"PartnerParameters,omitempty"`
-	PartnerSdkParams          Parameters `json:"PartnerSdkParams,omitempty"`
-	PublisherParams           Parameters `json:",omitempty"`
-	DynamicCallbackParameters Parameters `json:"DynamicCallbackParameters,omitempty"`
-	ApiPartnerParams          Parameters `json:",omitempty"`
+	PartnerParameters         map[string]string `json:"PartnerParameters,omitempty"`
+	PartnerSdkParams          map[string]string `json:"PartnerSdkParams,omitempty"`
+	PublisherParams           map[string]string `json:",omitempty"`
+	DynamicCallbackParameters map[string]string `json:"DynamicCallbackParameters,omitempty"`
+	ApiPartnerParams          map[string]string `json:",omitempty"`
 
 	// for ad revenue update
 	AdImpressionsCount  int    `json:",omitempty"`
@@ -123,6 +122,4 @@ type Data struct {
 	AdRevenueUnit       string `json:",omitempty"`
 	AdRevenuePlacement  string `json:",omitempty"`
 	AdMediationPlatform string `json:",omitempty"`
-
-	XXX_unrecognized []byte `json:"-"`
 }

@@ -3,7 +3,6 @@ package github.com.narqo.benchserder.internal.callback;
 
 import "github.com/gogo/protobuf/gogoproto/gogo.proto";
 import "github.com/narqo/benchserder/internal/engagementtype/generated.proto";
-import "github.com/narqo/benchserder/internal/tokens/generated.proto";
 import "github.com/narqo/benchserder/internal/device/generated.proto";
 import "github.com/narqo/benchserder/internal/money/generated.proto";
 import "github.com/narqo/benchserder/internal/nullable/generated.proto";
@@ -21,12 +20,12 @@ message Data {
 	bool terms_signed = 1;
 	string reference_tag = 2;
 	int64 engagement_type = 3 [(gogoproto.casttype) = "github.com/narqo/benchserder/internal/engagementtype.Type"];
-	string tracker = 4 [(gogoproto.casttype) = "github.com/narqo/benchserder/internal/tokens.TrackerToken"];
-	string install_tracker = 5 [(gogoproto.casttype) = "github.com/narqo/benchserder/internal/tokens.TrackerToken"];
-	string last_tracker = 6 [(gogoproto.casttype) = "github.com/narqo/benchserder/internal/tokens.TrackerToken"];
-	string outdated_tracker = 7 [(gogoproto.casttype) = "github.com/narqo/benchserder/internal/tokens.TrackerToken"];
-	string app_token = 8 [(gogoproto.casttype) = "github.com/narqo/benchserder/internal/tokens.AppToken"];
-	string adid = 9 [(gogoproto.casttype) = "github.com/narqo/benchserder/internal/tokens.Adid"];
+	string tracker = 4;
+	string install_tracker = 5;
+	string last_tracker = 6;
+	string outdated_tracker = 7;
+	string app_token = 8;
+	string adid = 9;
 	string os_name = 10;
 	string os_version = 11;
 	string os_build = 12;
@@ -83,7 +82,7 @@ message Data {
 	string search_term = 63;
 	string click_referer = 64;
 	bool impression_based = 65;
-	github.com.narqo.benchserder.internal.fraud.Kind fraud_kind = 66;
+	uint32 fraud_kind = 66 [(gogoproto.casttype) = "github.com/narqo/benchserder/internal/fraud.Kind"];
 	string cpu_type = 67;
 	string hardware_name = 68;
 	string network_type = 69;
@@ -110,16 +109,15 @@ message Data {
 	github.com.narqo.benchserder.internal.nullable.Duration fingerprint_attribution_window = 90 [(gogoproto.nullable) = false];
 	github.com.narqo.benchserder.internal.nullable.Duration reattribution_attribution_window = 91 [(gogoproto.nullable) = false];
 	github.com.narqo.benchserder.internal.nullable.Duration inactive_user_definition = 92 [(gogoproto.nullable) = false];
-	map<string, string> partner_parameters = 93 [(gogoproto.casttype) = "Parameters"];
-	map<string, string> partner_sdk_params = 94 [(gogoproto.casttype) = "Parameters"];
-	map<string, string> publisher_params = 95 [(gogoproto.casttype) = "Parameters"];
-	map<string, string> dynamic_callback_parameters = 96 [(gogoproto.casttype) = "Parameters"];
-	map<string, string> api_partner_params = 97 [(gogoproto.casttype) = "Parameters"];
+	map<string, string> partner_parameters = 93;
+	map<string, string> partner_sdk_params = 94;
+	map<string, string> publisher_params = 95;
+	map<string, string> dynamic_callback_parameters = 96;
+	map<string, string> api_partner_params = 97;
 	int64 ad_impressions_count = 98 [(gogoproto.casttype) = "int"];
 	string ad_revenue_network = 99;
 	string ad_revenue_unit = 100;
 	string ad_revenue_placement = 101;
 	string ad_mediation_platform = 102;
-	bytes xxx_unrecognized = 103 [(gogoproto.customname) = "XXX_unrecognized"];
 }
 

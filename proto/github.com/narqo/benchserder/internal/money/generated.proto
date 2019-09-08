@@ -17,7 +17,6 @@ message Amount {
 	double base_amount = 3;
 	double reporting_amount = 4;
 	string reporting_currency = 5;
-	bytes xxx_unrecognized = 6 [(gogoproto.customname) = "XXX_unrecognized"];
 }
 
 // represents costs that could be associated with an incoming activity
@@ -27,6 +26,5 @@ message Cost {
 	option (gogoproto.typedecl) = false;
 	github.com.narqo.benchserder.internal.money.Amount amount = 1 [(gogoproto.nullable) = false];
 	int64 cost_type = 2 [(gogoproto.casttype) = "CostType"];
-	bytes xxx_unrecognized = 3 [(gogoproto.customname) = "XXX_unrecognized"];
 }
 

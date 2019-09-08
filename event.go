@@ -7,15 +7,14 @@ import (
 	"github.com/narqo/benchserder/internal/fraud"
 	"github.com/narqo/benchserder/internal/money"
 	"github.com/narqo/benchserder/internal/nullable"
-	"github.com/narqo/benchserder/internal/tokens"
 )
 
 //easyjson:json
 //proteus:generate
 type Event struct {
-	AppToken tokens.AppToken
-	Tracker  tokens.TrackerToken
-	Adid     tokens.Adid
+	AppToken string
+	Tracker  string
+	Adid     string
 
 	FacebookAttributionId string
 	FacebookAnonId        string
@@ -29,14 +28,14 @@ type Event struct {
 	CreatedAt        time.Time
 	ReceivedAt       time.Time
 
-	InstallTime            time.Time           `json:",omitempty"`
-	InstallTracker         tokens.TrackerToken `json:",omitempty"`
-	InstallCountry         string              `json:",omitempty"`
-	InstallImpressionBased nullable.Bool       `json:",omitempty"`
+	InstallTime            time.Time     `json:",omitempty"`
+	InstallTracker         string        `json:",omitempty"`
+	InstallCountry         string        `json:",omitempty"`
+	InstallImpressionBased nullable.Bool `json:",omitempty"`
 
 	EventToken string
 
-	Revenue money.Amount `json:"RevenueData"`
+	RevenueData money.Amount `json:"RevenueData"`
 
 	DeviceType  string
 	Environment string
@@ -57,14 +56,4 @@ type Event struct {
 	FirstDeviceType    string
 	ImpressionBased    bool
 	DeviceReattributed bool
-
-	//headerData      *header.Data
-	//eventCount      int
-	//lastEventCount  int
-	//sessionCount    int
-	//subsessionCount int
-	//sessionLength   int
-	//timeSpent       int
-
-	XXX_unrecognized []byte `json:"-"`
 }
