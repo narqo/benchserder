@@ -10,7 +10,7 @@ import (
 	proto "github.com/golang/protobuf/proto"
 	"github.com/mailru/easyjson"
 	"github.com/ugorji/go/codec"
-	"github.com/vmihailenco/msgpack"
+	"github.com/vmihailenco/msgpack/v4"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
