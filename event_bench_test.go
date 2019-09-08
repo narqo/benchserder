@@ -39,14 +39,27 @@ func TestEvent_MarshalUnmarshalMsgpack(t *testing.T) {
 			var event Event
 			require.NoError(t, json.Unmarshal(data, &event))
 
-			mData, err := marshalMsgpack(event)
-			require.NoError(t, err)
+			t.Run("as struct", func(t *testing.T) {
+				mData, err := marshalMsgpack(event)
+				require.NoError(t, err)
 
-			err = unmarshalMsgpack(mData, &event)
-			require.NoError(t, err)
+				err = unmarshalMsgpack(mData, &event)
+				require.NoError(t, err)
 
-			gotData, _ := json.Marshal(event)
-			assert.JSONEq(t, string(data), string(gotData))
+				gotData, _ := json.Marshal(event)
+				assert.JSONEq(t, string(data), string(gotData))
+			})
+
+			t.Run("as array", func(t *testing.T) {
+				mData, err := marshalMsgpackAsArray(event)
+				require.NoError(t, err)
+
+				err = unmarshalMsgpack(mData, &event)
+				require.NoError(t, err)
+
+				gotData, _ := json.Marshal(event)
+				assert.JSONEq(t, string(data), string(gotData))
+			})
 		})
 	}
 }
@@ -112,14 +125,15 @@ var testCases = map[string]struct {
 	marshalFunc   marshalFunc
 	unmarshalFunc unmarshalFunc
 }{
-	"json":                {json.Marshal, json.Unmarshal},
-	"mailru-easyjson":     {marshalEasyJSON, unmarshalEasyJSON},
-	"vmihailenco-msgpack": {marshalMsgpack, unmarshalMsgpack},
-	"codec-msgpack":       {marshalCodecMsgpack, unmarshalCodecMsgpack},
-	"codec-cbor":          {marshalCodecCBOR, unmarshalCodecCBOR},
-	"fxamacker-cbor":      {marshalFxamackerCBOR, unmarshalFxamackerCBOR},
-	"bson":                {marshalBSON, unmarshalBSON},
-	"gogo-proto":          {marshalGogoProto, unmarshalGogoProto},
+	"json":                    {json.Marshal, json.Unmarshal},
+	"mailru-easyjson":         {marshalEasyJSON, unmarshalEasyJSON},
+	"vmihailenco-msgpack":     {marshalMsgpack, unmarshalMsgpack},
+	"vmihailenco-msgpack-arr": {marshalMsgpackAsArray, unmarshalMsgpack},
+	"codec-msgpack":           {marshalCodecMsgpack, unmarshalCodecMsgpack},
+	"codec-cbor":              {marshalCodecCBOR, unmarshalCodecCBOR},
+	"fxamacker-cbor":          {marshalFxamackerCBOR, unmarshalFxamackerCBOR},
+	"bson":                    {marshalBSON, unmarshalBSON},
+	"gogo-proto":              {marshalGogoProto, unmarshalGogoProto},
 }
 
 func BenchmarkEvent_Marshal(b *testing.B) {

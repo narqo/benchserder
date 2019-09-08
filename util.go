@@ -30,10 +30,16 @@ func marshalMsgpack(v interface{}) ([]byte, error) {
 	var buf bytes.Buffer
 	enc := msgpack.NewEncoder(&buf)
 	enc.UseJSONTag(true)
-	if err := enc.Encode(v); err != nil {
-		return nil, err
-	}
-	return buf.Bytes(), nil
+	err := enc.Encode(v)
+	return buf.Bytes(), err
+}
+
+func marshalMsgpackAsArray(v interface{}) ([]byte, error) {
+	var buf bytes.Buffer
+	enc := msgpack.NewEncoder(&buf)
+	enc.StructAsArray(true)
+	err := enc.Encode(v)
+	return buf.Bytes(), err
 }
 
 func unmarshalMsgpack(data []byte, v interface{}) error {

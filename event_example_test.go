@@ -27,6 +27,9 @@ func ExampleEvent_MarshalUnmarshal() {
 		data, _ = marshalMsgpack(event)
 		fmt.Fprintf(os.Stdout, "--- vmihailenco/msgpack: %d\n", len(data))
 
+		data, _ = marshalMsgpackAsArray(event)
+		fmt.Fprintf(os.Stdout, "--- vmihailenco/msgpack (as array): %d\n", len(data))
+
 		data, _ = marshalCodecMsgpack(event)
 		fmt.Fprintf(os.Stdout, "--- codec/msgpack:\t %d\n", len(data))
 
