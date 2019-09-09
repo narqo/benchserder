@@ -10,8 +10,8 @@ import (
 
 var testEvents = []string{
 	"event_2K.json",
+	"event_5K.json",
 	"event_10K.json",
-	"event_25K.json",
 	"event_50K.json",
 	"event_100K.json",
 	"event_225K.json",
