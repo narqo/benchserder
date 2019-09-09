@@ -12,6 +12,7 @@ import (
 	"github.com/golang/protobuf/proto"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/mailru/easyjson"
+	thrifter "github.com/thrift-iterator/go"
 	"github.com/ugorji/go/codec"
 	"github.com/vmihailenco/msgpack/v4"
 	"go.mongodb.org/mongo-driver/bson"
@@ -69,6 +70,15 @@ var marshallers = []struct {
 			return &testMarshaller{
 				marshalFunc:   jsoniter.ConfigCompatibleWithStandardLibrary.Marshal,
 				unmarshalFunc: jsoniter.ConfigCompatibleWithStandardLibrary.Unmarshal,
+			}
+		},
+	},
+	{
+		"thrifter",
+		func() *testMarshaller {
+			return &testMarshaller{
+				marshalFunc:   thrifter.Marshal,
+				unmarshalFunc: thrifter.Unmarshal,
 			}
 		},
 	},

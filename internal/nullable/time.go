@@ -6,8 +6,8 @@ import (
 )
 
 type Time struct {
-	Time  time.Time
-	Valid bool // Valid is true if Time is not null
+	Time  time.Time `thrift:",1"`
+	Valid bool      `thrift:",2"` // Valid is true if Time is not null
 }
 
 func NewTime(value time.Time) Time {

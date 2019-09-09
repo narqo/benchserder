@@ -12,48 +12,48 @@ import (
 //easyjson:json
 //proteus:generate
 type Event struct {
-	AppToken string
-	Tracker  string
-	Adid     string
+	AppToken string `thrift:",1"`
+	Tracker  string `thrift:",2"`
+	Adid     string `thrift:",3"`
 
-	FacebookAttributionId string
-	FacebookAnonId        string
-	TrackingEnabled       string
+	FacebookAttributionId string `thrift:",4"`
+	FacebookAnonId        string `thrift:",5"`
+	TrackingEnabled       string `thrift:",6"`
 
-	ClickTime        time.Time
-	FirstSessionTime time.Time
-	LastSessionTime  time.Time
-	LastEventTime    time.Time
-	LastRevenueTime  time.Time
-	CreatedAt        time.Time
-	ReceivedAt       time.Time
+	ClickTime        time.Time `thrift:",7"`
+	FirstSessionTime time.Time `thrift:",8"`
+	LastSessionTime  time.Time `thrift:",9"`
+	LastEventTime    time.Time `thrift:",10"`
+	LastRevenueTime  time.Time `thrift:",11"`
+	CreatedAt        time.Time `thrift:",12"`
+	ReceivedAt       time.Time `thrift:",13"`
 
-	InstallTime            time.Time     `json:",omitempty"`
-	InstallTracker         string        `json:",omitempty"`
-	InstallCountry         string        `json:",omitempty"`
-	InstallImpressionBased nullable.Bool `json:",omitempty"`
+	InstallTime            time.Time     `json:",omitempty" thrift:",14"`
+	InstallTracker         string        `json:",omitempty" thrift:",15"`
+	InstallCountry         string        `json:",omitempty" thrift:",16"`
+	InstallImpressionBased nullable.Bool `json:",omitempty" thrift:",17"`
 
-	EventToken string
+	EventToken string `thrift:",18"`
 
-	RevenueData money.Amount `json:"RevenueData"`
+	RevenueData money.Amount `json:"RevenueData" thrift:",19"`
 
-	DeviceType  string
-	Environment string
+	DeviceType  string `thrift:",20"`
+	Environment string `thrift:",21"`
 
-	NullSdkLevel nullable.Int `json:"NullSdkLevel"`
-	ZoneOffset   int
+	NullSdkLevel nullable.Int `json:"NullSdkLevel" thrift:",22"`
+	ZoneOffset   int          `thrift:",23"`
 
 	// for attribution
-	FraudKind fraud.Kind `json:"FraudKind"`
+	FraudKind fraud.Kind `json:"FraudKind" thrift:",24"`
 
 	// for callbacks
-	PingbackUrl  string
-	CallbackData *callback.Data
+	PingbackUrl  string         `thrift:",25"`
+	CallbackData *callback.Data `thrift:",26"`
 
 	// for insert
-	FirstOsName        string
-	FirstCountry       string
-	FirstDeviceType    string
-	ImpressionBased    bool
-	DeviceReattributed bool
+	FirstOsName        string `thrift:",27"`
+	FirstCountry       string `thrift:",28"`
+	FirstDeviceType    string `thrift:",29"`
+	ImpressionBased    bool   `thrift:",30"`
+	DeviceReattributed bool   `thrift:",31"`
 }

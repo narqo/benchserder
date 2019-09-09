@@ -3,8 +3,8 @@ package nullable
 import "time"
 
 type Duration struct {
-	Duration time.Duration
-	Valid    bool
+	Duration time.Duration `thrift:",1"`
+	Valid    bool          `thrift:",2"`
 }
 
 func NewDuration(duration time.Duration) Duration {
