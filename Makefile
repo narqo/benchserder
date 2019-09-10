@@ -4,8 +4,7 @@ GO ?= go
 PROTOC ?= protoc
 
 BINDIR := $(CURDIR)/bin
-
-EASYJSON := $(BINDIR)/easyjson
+TESTFLAGS :=
 
 SHELL := /bin/bash
 PATH := $(PATH):$(BINDIR)
@@ -16,9 +15,13 @@ PATH := $(PATH):$(BINDIR)
 .PHONY: all
 all:
 
+.PHONY: test
+test:
+	$(GO) test -mod=vendor $(TESTFLAGS) ./...
+
 .PHONY: generate-json
 generate-json:
-	$(EASYJSON) -no_std_marshalers event.go
+	$(BINDIR)/easyjson -no_std_marshalers event.go
 
 PROTO_FILES := $(shell find proto -name '*.proto')
 
