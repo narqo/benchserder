@@ -8,7 +8,8 @@ import (
 	"testing"
 
 	"github.com/fxamacker/cbor"
-	proto "github.com/golang/protobuf/proto"
+	"github.com/golang/protobuf/proto"
+	jsoniter "github.com/json-iterator/go"
 	"github.com/mailru/easyjson"
 	"github.com/ugorji/go/codec"
 	"github.com/vmihailenco/msgpack/v4"
@@ -43,6 +44,15 @@ var marshallers = []struct {
 				unmarshalFunc: func(data []byte, v interface{}) error {
 					return easyjson.Unmarshal(data, v.(easyjson.Unmarshaler))
 				},
+			}
+		},
+	},
+	{
+		"jsoniter",
+		func() *testMarshaller {
+			return &testMarshaller{
+				marshalFunc:   jsoniter.ConfigCompatibleWithStandardLibrary.Marshal,
+				unmarshalFunc: jsoniter.ConfigCompatibleWithStandardLibrary.Unmarshal,
 			}
 		},
 	},
