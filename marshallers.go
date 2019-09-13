@@ -95,6 +95,23 @@ var marshallers = []struct {
 		},
 	},
 	{
+		"codec-json",
+		func() *testMarshaller {
+			return &testMarshaller{
+				marshalFunc: func(v interface{}) ([]byte, error) {
+					var h codec.JsonHandle
+					var buf bytes.Buffer
+					err := codec.NewEncoder(&buf, &h).Encode(v)
+					return buf.Bytes(), err
+				},
+				unmarshalFunc: func(data []byte, v interface{}) error {
+					var h codec.JsonHandle
+					return codec.NewDecoderBytes(data, &h).Decode(v)
+				},
+			}
+		},
+	},
+	{
 		"codec-msgpack",
 		func() *testMarshaller {
 			return &testMarshaller{
