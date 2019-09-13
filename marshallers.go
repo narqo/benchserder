@@ -2,6 +2,7 @@ package benchserder
 
 import (
 	"bytes"
+	"encoding/gob"
 	"encoding/json"
 	"io/ioutil"
 	"path/filepath"
@@ -31,6 +32,21 @@ var marshallers = []struct {
 			return &testMarshaller{
 				marshalFunc:   json.Marshal,
 				unmarshalFunc: json.Unmarshal,
+			}
+		},
+	},
+	{
+		"gob",
+		func() *testMarshaller {
+			return &testMarshaller{
+				marshalFunc: func(v interface{}) ([]byte, error) {
+					var buf bytes.Buffer
+					err := gob.NewEncoder(&buf).Encode(v)
+					return buf.Bytes(), err
+				},
+				unmarshalFunc: func(data []byte, v interface{}) error {
+					return gob.NewDecoder(bytes.NewReader(data)).Decode(v)
+				},
 			}
 		},
 	},
