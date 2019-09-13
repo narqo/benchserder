@@ -1,0 +1,167 @@
+goos: darwin
+goarch: amd64
+pkg: github.com/narqo/benchserder
+BenchmarkEvent_Marshal/marshaller=json/file=event_2K.json-4         	   60702	     18888 ns/op	    5520 B/op	      52 allocs/op
+BenchmarkEvent_Marshal/marshaller=json/file=event_5K.json-4         	   48307	     24218 ns/op	    9633 B/op	      68 allocs/op
+BenchmarkEvent_Marshal/marshaller=json/file=event_10K.json-4        	   26888	     44243 ns/op	   17682 B/op	     144 allocs/op
+BenchmarkEvent_Marshal/marshaller=json/file=event_50K.json-4        	   14643	     84363 ns/op	   61966 B/op	     100 allocs/op
+BenchmarkEvent_Marshal/marshaller=json/file=event_100K.json-4       	    2865	    389083 ns/op	  140996 B/op	     710 allocs/op
+BenchmarkEvent_Marshal/marshaller=json/file=event_225K.json-4       	    4022	    262466 ns/op	  234021 B/op	     100 allocs/op
+BenchmarkEvent_Marshal/marshaller=easyjson/file=event_2K.json-4     	  124706	      8855 ns/op	    3651 B/op	      25 allocs/op
+BenchmarkEvent_Marshal/marshaller=easyjson/file=event_5K.json-4     	   68637	     16913 ns/op	    7788 B/op	      26 allocs/op
+BenchmarkEvent_Marshal/marshaller=easyjson/file=event_10K.json-4    	   40118	     29268 ns/op	   11939 B/op	      27 allocs/op
+BenchmarkEvent_Marshal/marshaller=easyjson/file=event_50K.json-4    	    8936	    122775 ns/op	   59606 B/op	      29 allocs/op
+BenchmarkEvent_Marshal/marshaller=easyjson/file=event_100K.json-4   	    2757	    375518 ns/op	  109692 B/op	      32 allocs/op
+BenchmarkEvent_Marshal/marshaller=easyjson/file=event_225K.json-4   	    2252	    486183 ns/op	  233840 B/op	      36 allocs/op
+BenchmarkEvent_Marshal/marshaller=vmihailenco-msgpack/file=event_2K.json-4         	   80978	     13648 ns/op	    7297 B/op	      31 allocs/op
+BenchmarkEvent_Marshal/marshaller=vmihailenco-msgpack/file=event_5K.json-4         	   68662	     16336 ns/op	   17170 B/op	      34 allocs/op
+BenchmarkEvent_Marshal/marshaller=vmihailenco-msgpack/file=event_10K.json-4        	   55888	     20678 ns/op	   30228 B/op	      35 allocs/op
+BenchmarkEvent_Marshal/marshaller=vmihailenco-msgpack/file=event_50K.json-4        	   44401	     25810 ns/op	   73252 B/op	      35 allocs/op
+BenchmarkEvent_Marshal/marshaller=vmihailenco-msgpack/file=event_100K.json-4       	   16042	     73194 ns/op	  227887 B/op	      38 allocs/op
+BenchmarkEvent_Marshal/marshaller=vmihailenco-msgpack/file=event_225K.json-4       	   21787	     53628 ns/op	  237122 B/op	      35 allocs/op
+BenchmarkEvent_Marshal/marshaller=vmihailenco-msgpack-as-array/file=event_2K.json-4         	  113348	     10012 ns/op	    3184 B/op	      28 allocs/op
+BenchmarkEvent_Marshal/marshaller=vmihailenco-msgpack-as-array/file=event_5K.json-4         	   96496	     11716 ns/op	    9078 B/op	      31 allocs/op
+BenchmarkEvent_Marshal/marshaller=vmihailenco-msgpack-as-array/file=event_10K.json-4        	   68078	     16532 ns/op	   25427 B/op	      33 allocs/op
+BenchmarkEvent_Marshal/marshaller=vmihailenco-msgpack-as-array/file=event_50K.json-4        	   54801	     21207 ns/op	   61963 B/op	      32 allocs/op
+BenchmarkEvent_Marshal/marshaller=vmihailenco-msgpack-as-array/file=event_100K.json-4       	   15025	     80641 ns/op	  277610 B/op	      36 allocs/op
+BenchmarkEvent_Marshal/marshaller=vmihailenco-msgpack-as-array/file=event_225K.json-4       	   23586	     50923 ns/op	  234737 B/op	      33 allocs/op
+BenchmarkEvent_Marshal/marshaller=codec-msgpack/file=event_2K.json-4                        	   78127	     14475 ns/op	   13522 B/op	      61 allocs/op
+BenchmarkEvent_Marshal/marshaller=codec-msgpack/file=event_5K.json-4                        	   64288	     18068 ns/op	   22418 B/op	      65 allocs/op
+BenchmarkEvent_Marshal/marshaller=codec-msgpack/file=event_10K.json-4                       	   48577	     23713 ns/op	   38802 B/op	      66 allocs/op
+BenchmarkEvent_Marshal/marshaller=codec-msgpack/file=event_50K.json-4                       	   28771	     40884 ns/op	  137106 B/op	      68 allocs/op
+BenchmarkEvent_Marshal/marshaller=codec-msgpack/file=event_100K.json-4                      	   13874	     85738 ns/op	  268179 B/op	      69 allocs/op
+BenchmarkEvent_Marshal/marshaller=codec-msgpack/file=event_225K.json-4                      	    9930	    117556 ns/op	  530325 B/op	      70 allocs/op
+BenchmarkEvent_Marshal/marshaller=codec-cbor/file=event_2K.json-4                           	   71227	     15408 ns/op	   13522 B/op	      61 allocs/op
+BenchmarkEvent_Marshal/marshaller=codec-cbor/file=event_5K.json-4                           	   60685	     18834 ns/op	   22418 B/op	      65 allocs/op
+BenchmarkEvent_Marshal/marshaller=codec-cbor/file=event_10K.json-4                          	   47504	     24626 ns/op	   38802 B/op	      66 allocs/op
+BenchmarkEvent_Marshal/marshaller=codec-cbor/file=event_50K.json-4                          	   28190	     41564 ns/op	  137106 B/op	      68 allocs/op
+BenchmarkEvent_Marshal/marshaller=codec-cbor/file=event_100K.json-4                         	   13575	     87666 ns/op	  268179 B/op	      69 allocs/op
+BenchmarkEvent_Marshal/marshaller=codec-cbor/file=event_225K.json-4                         	    8778	    119237 ns/op	  530325 B/op	      70 allocs/op
+BenchmarkEvent_Marshal/marshaller=fxamacker-cbor/file=event_2K.json-4                       	   89366	     12951 ns/op	    3714 B/op	      30 allocs/op
+BenchmarkEvent_Marshal/marshaller=fxamacker-cbor/file=event_5K.json-4                       	   77936	     14962 ns/op	    7152 B/op	      41 allocs/op
+BenchmarkEvent_Marshal/marshaller=fxamacker-cbor/file=event_10K.json-4                      	   51733	     22876 ns/op	   13089 B/op	     115 allocs/op
+BenchmarkEvent_Marshal/marshaller=fxamacker-cbor/file=event_50K.json-4                      	   37262	     31337 ns/op	   59375 B/op	      69 allocs/op
+BenchmarkEvent_Marshal/marshaller=fxamacker-cbor/file=event_100K.json-4                     	   12403	     95684 ns/op	  110710 B/op	     681 allocs/op
+BenchmarkEvent_Marshal/marshaller=fxamacker-cbor/file=event_225K.json-4                     	   13707	     86850 ns/op	  240132 B/op	      69 allocs/op
+BenchmarkEvent_Marshal/marshaller=bson/file=event_2K.json-4                                 	   67533	     17173 ns/op	   14916 B/op	      26 allocs/op
+BenchmarkEvent_Marshal/marshaller=bson/file=event_5K.json-4                                 	   56406	     20563 ns/op	   26790 B/op	      36 allocs/op
+BenchmarkEvent_Marshal/marshaller=bson/file=event_10K.json-4                                	   38500	     30703 ns/op	   39843 B/op	     111 allocs/op
+BenchmarkEvent_Marshal/marshaller=bson/file=event_50K.json-4                                	   38744	     30645 ns/op	   73397 B/op	      63 allocs/op
+BenchmarkEvent_Marshal/marshaller=bson/file=event_100K.json-4                               	    6847	    154864 ns/op	  404682 B/op	     685 allocs/op
+BenchmarkEvent_Marshal/marshaller=bson/file=event_225K.json-4                               	   20341	     57334 ns/op	  245569 B/op	      65 allocs/op
+BenchmarkEvent_Marshal/marshaller=gogo-proto/file=event_2K.json-4                           	  261644	      3859 ns/op	    3152 B/op	      52 allocs/op
+BenchmarkEvent_Marshal/marshaller=gogo-proto/file=event_5K.json-4                           	  210380	      4979 ns/op	    6544 B/op	      52 allocs/op
+BenchmarkEvent_Marshal/marshaller=gogo-proto/file=event_10K.json-4                          	  132542	      8586 ns/op	   11920 B/op	      52 allocs/op
+BenchmarkEvent_Marshal/marshaller=gogo-proto/file=event_50K.json-4                          	   76274	     14832 ns/op	   59792 B/op	      52 allocs/op
+BenchmarkEvent_Marshal/marshaller=gogo-proto/file=event_100K.json-4                         	   24238	     48676 ns/op	  100752 B/op	      52 allocs/op
+BenchmarkEvent_Marshal/marshaller=gogo-proto/file=event_225K.json-4                         	   26366	     44126 ns/op	  231824 B/op	      52 allocs/op
+BenchmarkEvent_Unmarshal/marshaller=json/file=event_2K.json-4                               	   27589	     43220 ns/op	    1312 B/op	      68 allocs/op
+BenchmarkEvent_Unmarshal/marshaller=json/file=event_5K.json-4                               	   17924	     66037 ns/op	    4960 B/op	      90 allocs/op
+BenchmarkEvent_Unmarshal/marshaller=json/file=event_10K.json-4                              	    9571	    115792 ns/op	   17584 B/op	     274 allocs/op
+BenchmarkEvent_Unmarshal/marshaller=json/file=event_50K.json-4                              	    3228	    327072 ns/op	   60337 B/op	     159 allocs/op
+BenchmarkEvent_Unmarshal/marshaller=json/file=event_100K.json-4                             	    1347	    865050 ns/op	  208640 B/op	    1987 allocs/op
+BenchmarkEvent_Unmarshal/marshaller=json/file=event_225K.json-4                             	     982	   1188657 ns/op	  232436 B/op	     160 allocs/op
+BenchmarkEvent_Unmarshal/marshaller=easyjson/file=event_2K.json-4                           	   93394	     12279 ns/op	    1024 B/op	      55 allocs/op
+BenchmarkEvent_Unmarshal/marshaller=easyjson/file=event_5K.json-4                           	   65061	     17989 ns/op	    5152 B/op	      72 allocs/op
+BenchmarkEvent_Unmarshal/marshaller=easyjson/file=event_10K.json-4                          	   32286	     36840 ns/op	   19132 B/op	     150 allocs/op
+BenchmarkEvent_Unmarshal/marshaller=easyjson/file=event_50K.json-4                          	   16419	     72476 ns/op	   60593 B/op	     105 allocs/op
+BenchmarkEvent_Unmarshal/marshaller=easyjson/file=event_100K.json-4                         	    2786	    392513 ns/op	  216513 B/op	    1031 allocs/op
+BenchmarkEvent_Unmarshal/marshaller=easyjson/file=event_225K.json-4                         	    4482	    247814 ns/op	  232690 B/op	     106 allocs/op
+BenchmarkEvent_Unmarshal/marshaller=vmihailenco-msgpack/file=event_2K.json-4                	   61638	     18941 ns/op	    2784 B/op	     177 allocs/op
+BenchmarkEvent_Unmarshal/marshaller=vmihailenco-msgpack/file=event_5K.json-4                	   52240	     22418 ns/op	    9472 B/op	     201 allocs/op
+BenchmarkEvent_Unmarshal/marshaller=vmihailenco-msgpack/file=event_10K.json-4               	   38480	     30946 ns/op	   17488 B/op	     278 allocs/op
+BenchmarkEvent_Unmarshal/marshaller=vmihailenco-msgpack/file=event_50K.json-4               	   27196	     42359 ns/op	  118304 B/op	     235 allocs/op
+BenchmarkEvent_Unmarshal/marshaller=vmihailenco-msgpack/file=event_100K.json-4              	   10000	    101756 ns/op	  108290 B/op	     848 allocs/op
+BenchmarkEvent_Unmarshal/marshaller=vmihailenco-msgpack/file=event_225K.json-4              	   10000	    103750 ns/op	  462435 B/op	     237 allocs/op
+BenchmarkEvent_Unmarshal/marshaller=vmihailenco-msgpack-as-array/file=event_2K.json-4       	   85185	     12612 ns/op	    1120 B/op	      57 allocs/op
+BenchmarkEvent_Unmarshal/marshaller=vmihailenco-msgpack-as-array/file=event_5K.json-4       	   76294	     14947 ns/op	    7648 B/op	      71 allocs/op
+BenchmarkEvent_Unmarshal/marshaller=vmihailenco-msgpack-as-array/file=event_10K.json-4      	   52633	     22269 ns/op	   15632 B/op	     145 allocs/op
+BenchmarkEvent_Unmarshal/marshaller=vmihailenco-msgpack-as-array/file=event_50K.json-4      	   34731	     33876 ns/op	  116448 B/op	     101 allocs/op
+BenchmarkEvent_Unmarshal/marshaller=vmihailenco-msgpack-as-array/file=event_100K.json-4     	   12936	     92296 ns/op	  105953 B/op	     713 allocs/op
+BenchmarkEvent_Unmarshal/marshaller=vmihailenco-msgpack-as-array/file=event_225K.json-4     	   13238	     90256 ns/op	  460577 B/op	     102 allocs/op
+BenchmarkEvent_Unmarshal/marshaller=codec-msgpack/file=event_2K.json-4                      	   83124	     13820 ns/op	    4016 B/op	      81 allocs/op
+BenchmarkEvent_Unmarshal/marshaller=codec-msgpack/file=event_5K.json-4                      	   67120	     17357 ns/op	    7792 B/op	      97 allocs/op
+BenchmarkEvent_Unmarshal/marshaller=codec-msgpack/file=event_10K.json-4                     	   50053	     23388 ns/op	   12880 B/op	     168 allocs/op
+BenchmarkEvent_Unmarshal/marshaller=codec-msgpack/file=event_50K.json-4                     	   40797	     28365 ns/op	   62336 B/op	     127 allocs/op
+BenchmarkEvent_Unmarshal/marshaller=codec-msgpack/file=event_100K.json-4                    	   15010	     79523 ns/op	   99313 B/op	     737 allocs/op
+BenchmarkEvent_Unmarshal/marshaller=codec-msgpack/file=event_225K.json-4                    	   20355	     57273 ns/op	  234418 B/op	     128 allocs/op
+BenchmarkEvent_Unmarshal/marshaller=codec-cbor/file=event_2K.json-4                         	   73405	     14456 ns/op	    4016 B/op	      81 allocs/op
+BenchmarkEvent_Unmarshal/marshaller=codec-cbor/file=event_5K.json-4                         	   64448	     18088 ns/op	    7792 B/op	      97 allocs/op
+BenchmarkEvent_Unmarshal/marshaller=codec-cbor/file=event_10K.json-4                        	   48810	     24044 ns/op	   12896 B/op	     168 allocs/op
+BenchmarkEvent_Unmarshal/marshaller=codec-cbor/file=event_50K.json-4                        	   40336	     29176 ns/op	   62320 B/op	     127 allocs/op
+BenchmarkEvent_Unmarshal/marshaller=codec-cbor/file=event_100K.json-4                       	   14901	     80346 ns/op	   99329 B/op	     737 allocs/op
+BenchmarkEvent_Unmarshal/marshaller=codec-cbor/file=event_225K.json-4                       	   20080	     57820 ns/op	  234417 B/op	     128 allocs/op
+BenchmarkEvent_Unmarshal/marshaller=fxamacker-cbor/file=event_2K.json-4                     	   41305	     28625 ns/op	     960 B/op	      56 allocs/op
+BenchmarkEvent_Unmarshal/marshaller=fxamacker-cbor/file=event_5K.json-4                     	   35623	     33017 ns/op	    4480 B/op	      73 allocs/op
+BenchmarkEvent_Unmarshal/marshaller=fxamacker-cbor/file=event_10K.json-4                    	   26131	     45337 ns/op	    9552 B/op	     144 allocs/op
+BenchmarkEvent_Unmarshal/marshaller=fxamacker-cbor/file=event_50K.json-4                    	   16264	     73252 ns/op	   59024 B/op	     105 allocs/op
+BenchmarkEvent_Unmarshal/marshaller=fxamacker-cbor/file=event_100K.json-4                   	    6099	    177536 ns/op	   95971 B/op	     713 allocs/op
+BenchmarkEvent_Unmarshal/marshaller=fxamacker-cbor/file=event_225K.json-4                   	    5166	    201935 ns/op	  231138 B/op	     106 allocs/op
+BenchmarkEvent_Unmarshal/marshaller=bson/file=event_2K.json-4                               	   42272	     27946 ns/op	    3904 B/op	     232 allocs/op
+BenchmarkEvent_Unmarshal/marshaller=bson/file=event_5K.json-4                               	   39614	     29599 ns/op	    7457 B/op	     251 allocs/op
+BenchmarkEvent_Unmarshal/marshaller=bson/file=event_10K.json-4                              	   28666	     41576 ns/op	   13698 B/op	     396 allocs/op
+BenchmarkEvent_Unmarshal/marshaller=bson/file=event_50K.json-4                              	   27787	     42564 ns/op	   62393 B/op	     307 allocs/op
+BenchmarkEvent_Unmarshal/marshaller=bson/file=event_100K.json-4                             	    8041	    138918 ns/op	  109254 B/op	    1531 allocs/op
+BenchmarkEvent_Unmarshal/marshaller=bson/file=event_225K.json-4                             	   16978	     70654 ns/op	  234537 B/op	     308 allocs/op
+BenchmarkEvent_Unmarshal/marshaller=gogo-proto/file=event_2K.json-4                         	  358432	      2976 ns/op	    1456 B/op	      60 allocs/op
+BenchmarkEvent_Unmarshal/marshaller=gogo-proto/file=event_5K.json-4                         	  247534	      4210 ns/op	    4912 B/op	      73 allocs/op
+BenchmarkEvent_Unmarshal/marshaller=gogo-proto/file=event_10K.json-4                        	  126480	      8430 ns/op	    9984 B/op	     144 allocs/op
+BenchmarkEvent_Unmarshal/marshaller=gogo-proto/file=event_50K.json-4                        	   73326	     15611 ns/op	   59456 B/op	     103 allocs/op
+BenchmarkEvent_Unmarshal/marshaller=gogo-proto/file=event_100K.json-4                       	   20301	     58531 ns/op	   96418 B/op	     713 allocs/op
+BenchmarkEvent_Unmarshal/marshaller=gogo-proto/file=event_225K.json-4                       	   24944	     47210 ns/op	  231536 B/op	     104 allocs/op
+BenchmarkEvent_Compression/marshaller=json/file=event_2K.json-4                             	1000000000	         0.738 %compression	      2692 bytes
+BenchmarkEvent_Compression/marshaller=json/file=event_5K.json-4                             	1000000000	         0.895 %compression	      6252 bytes
+BenchmarkEvent_Compression/marshaller=json/file=event_10K.json-4                            	1000000000	         0.930 %compression	     10713 bytes
+BenchmarkEvent_Compression/marshaller=json/file=event_50K.json-4                            	1000000000	         0.988 %compression	     56462 bytes
+BenchmarkEvent_Compression/marshaller=json/file=event_100K.json-4                           	1000000000	         0.993 %compression	    102126 bytes
+BenchmarkEvent_Compression/marshaller=json/file=event_225K.json-4                           	1000000000	         0.997 %compression	    225759 bytes
+BenchmarkEvent_Compression/marshaller=easyjson/file=event_2K.json-4                         	1000000000	         1.00 %compression	      1986 bytes
+BenchmarkEvent_Compression/marshaller=easyjson/file=event_5K.json-4                         	1000000000	         1.00 %compression	      5583 bytes
+BenchmarkEvent_Compression/marshaller=easyjson/file=event_10K.json-4                        	1000000000	         0.992 %compression	     10044 bytes
+BenchmarkEvent_Compression/marshaller=easyjson/file=event_50K.json-4                        	1000000000	         1.00 %compression	     55793 bytes
+BenchmarkEvent_Compression/marshaller=easyjson/file=event_100K.json-4                       	1000000000	         0.999 %compression	    101457 bytes
+BenchmarkEvent_Compression/marshaller=easyjson/file=event_225K.json-4                       	1000000000	         1.00 %compression	    225090 bytes
+BenchmarkEvent_Compression/marshaller=vmihailenco-msgpack/file=event_2K.json-4              	1000000000	         0.917 %compression	      2168 bytes
+BenchmarkEvent_Compression/marshaller=vmihailenco-msgpack/file=event_5K.json-4              	1000000000	         0.986 %compression	      5675 bytes
+BenchmarkEvent_Compression/marshaller=vmihailenco-msgpack/file=event_10K.json-4             	1000000000	         1.00 %compression	      9925 bytes
+BenchmarkEvent_Compression/marshaller=vmihailenco-msgpack/file=event_50K.json-4             	1000000000	         1.00 %compression	     55819 bytes
+BenchmarkEvent_Compression/marshaller=vmihailenco-msgpack/file=event_100K.json-4            	1000000000	         1.11 %compression	     91730 bytes
+BenchmarkEvent_Compression/marshaller=vmihailenco-msgpack/file=event_225K.json-4            	1000000000	         1.00 %compression	    225114 bytes
+BenchmarkEvent_Compression/marshaller=vmihailenco-msgpack-as-array/file=event_2K.json-4     	1000000000	         2.46 %compression	       807 bytes
+BenchmarkEvent_Compression/marshaller=vmihailenco-msgpack-as-array/file=event_5K.json-4     	1000000000	         1.34 %compression	      4182 bytes
+BenchmarkEvent_Compression/marshaller=vmihailenco-msgpack-as-array/file=event_10K.json-4    	1000000000	         1.19 %compression	      8399 bytes
+BenchmarkEvent_Compression/marshaller=vmihailenco-msgpack-as-array/file=event_50K.json-4    	1000000000	         1.03 %compression	     54284 bytes
+BenchmarkEvent_Compression/marshaller=vmihailenco-msgpack-as-array/file=event_100K.json-4   	1000000000	         1.12 %compression	     90204 bytes
+BenchmarkEvent_Compression/marshaller=vmihailenco-msgpack-as-array/file=event_225K.json-4   	1000000000	         1.01 %compression	    223567 bytes
+BenchmarkEvent_Compression/marshaller=codec-msgpack/file=event_2K.json-4                    	1000000000	         1.44 %compression	      1376 bytes
+BenchmarkEvent_Compression/marshaller=codec-msgpack/file=event_5K.json-4                    	1000000000	         1.13 %compression	      4933 bytes
+BenchmarkEvent_Compression/marshaller=codec-msgpack/file=event_10K.json-4                   	1000000000	         1.08 %compression	      9208 bytes
+BenchmarkEvent_Compression/marshaller=codec-msgpack/file=event_50K.json-4                   	1000000000	         1.01 %compression	     55082 bytes
+BenchmarkEvent_Compression/marshaller=codec-msgpack/file=event_100K.json-4                  	1000000000	         1.11 %compression	     91162 bytes
+BenchmarkEvent_Compression/marshaller=codec-msgpack/file=event_225K.json-4                  	1000000000	         1.00 %compression	    224378 bytes
+BenchmarkEvent_Compression/marshaller=codec-cbor/file=event_2K.json-4                       	1000000000	         1.44 %compression	      1383 bytes
+BenchmarkEvent_Compression/marshaller=codec-cbor/file=event_5K.json-4                       	1000000000	         1.13 %compression	      4941 bytes
+BenchmarkEvent_Compression/marshaller=codec-cbor/file=event_10K.json-4                      	1000000000	         1.08 %compression	      9187 bytes
+BenchmarkEvent_Compression/marshaller=codec-cbor/file=event_50K.json-4                      	1000000000	         1.01 %compression	     55086 bytes
+BenchmarkEvent_Compression/marshaller=codec-cbor/file=event_100K.json-4                     	1000000000	         1.11 %compression	     90996 bytes
+BenchmarkEvent_Compression/marshaller=codec-cbor/file=event_225K.json-4                     	1000000000	         1.00 %compression	    224381 bytes
+BenchmarkEvent_Compression/marshaller=fxamacker-cbor/file=event_2K.json-4                   	1000000000	         0.736 %compression	      2698 bytes
+BenchmarkEvent_Compression/marshaller=fxamacker-cbor/file=event_5K.json-4                   	1000000000	         0.919 %compression	      6088 bytes
+BenchmarkEvent_Compression/marshaller=fxamacker-cbor/file=event_10K.json-4                  	1000000000	         0.967 %compression	     10301 bytes
+BenchmarkEvent_Compression/marshaller=fxamacker-cbor/file=event_50K.json-4                  	1000000000	         0.993 %compression	     56191 bytes
+BenchmarkEvent_Compression/marshaller=fxamacker-cbor/file=event_100K.json-4                 	1000000000	         1.10 %compression	     92110 bytes
+BenchmarkEvent_Compression/marshaller=fxamacker-cbor/file=event_225K.json-4                 	1000000000	         0.998 %compression	    225474 bytes
+BenchmarkEvent_Compression/marshaller=bson/file=event_2K.json-4                             	1000000000	         0.583 %compression	      3408 bytes
+BenchmarkEvent_Compression/marshaller=bson/file=event_5K.json-4                             	1000000000	         0.822 %compression	      6813 bytes
+BenchmarkEvent_Compression/marshaller=bson/file=event_10K.json-4                            	1000000000	         0.891 %compression	     11186 bytes
+BenchmarkEvent_Compression/marshaller=bson/file=event_50K.json-4                            	1000000000	         0.979 %compression	     56984 bytes
+BenchmarkEvent_Compression/marshaller=bson/file=event_100K.json-4                           	1000000000	         1.08 %compression	     94001 bytes
+BenchmarkEvent_Compression/marshaller=bson/file=event_225K.json-4                           	1000000000	         0.995 %compression	    226264 bytes
+BenchmarkEvent_Compression/marshaller=gogo-proto/file=event_2K.json-4                       	1000000000	         2.94 %compression	       676 bytes
+BenchmarkEvent_Compression/marshaller=gogo-proto/file=event_5K.json-4                       	1000000000	         1.37 %compression	      4075 bytes
+BenchmarkEvent_Compression/marshaller=gogo-proto/file=event_10K.json-4                      	1000000000	         1.18 %compression	      8470 bytes
+BenchmarkEvent_Compression/marshaller=gogo-proto/file=event_50K.json-4                      	1000000000	         1.03 %compression	     54252 bytes
+BenchmarkEvent_Compression/marshaller=gogo-proto/file=event_100K.json-4                     	1000000000	         1.10 %compression	     91867 bytes
+BenchmarkEvent_Compression/marshaller=gogo-proto/file=event_225K.json-4                     	1000000000	         1.01 %compression	    223536 bytes
+PASS
+ok  	github.com/narqo/benchserder	157.957s
