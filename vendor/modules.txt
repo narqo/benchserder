@@ -64,8 +64,37 @@ github.com/pmezard/go-difflib/difflib
 # github.com/stretchr/testify v1.4.0
 github.com/stretchr/testify/assert
 github.com/stretchr/testify/require
+# github.com/thrift-iterator/go v0.0.0-20190402154806-9b5a67519118
+github.com/thrift-iterator/go
+github.com/thrift-iterator/go/binding/codegen
+github.com/thrift-iterator/go/binding/reflection
+github.com/thrift-iterator/go/general
+github.com/thrift-iterator/go/protocol
+github.com/thrift-iterator/go/protocol/binary
+github.com/thrift-iterator/go/protocol/compact
+github.com/thrift-iterator/go/raw
+github.com/thrift-iterator/go/spi
 # github.com/ugorji/go/codec v1.1.7
 github.com/ugorji/go/codec
+# github.com/v2pro/plz v0.0.0-20180227161703-2d49b86ea382
+github.com/v2pro/plz/concurrent
+github.com/v2pro/plz/countlog
+github.com/v2pro/plz/countlog/loglog
+github.com/v2pro/plz/countlog/output
+github.com/v2pro/plz/countlog/output/hrf
+github.com/v2pro/plz/countlog/spi
+github.com/v2pro/plz/countlog/stats
+github.com/v2pro/plz/gls
+github.com/v2pro/plz/msgfmt
+github.com/v2pro/plz/msgfmt/jsonfmt
+github.com/v2pro/plz/parse
+github.com/v2pro/plz/parse/read
+github.com/v2pro/plz/parse/skip
+github.com/v2pro/plz/reflect2
+# github.com/v2pro/quokka v0.0.0-20171201153428-382cb39c6ee6
+github.com/v2pro/quokka/docstore/compiler
+# github.com/v2pro/wombat v0.0.0-20180402055224-a56dbdcddef2
+github.com/v2pro/wombat/generic
 # github.com/vmihailenco/msgpack/v4 v4.2.0
 github.com/vmihailenco/msgpack/v4
 github.com/vmihailenco/msgpack/v4/codes

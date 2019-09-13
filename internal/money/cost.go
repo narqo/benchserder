@@ -47,8 +47,8 @@ func (cost CostType) String() string {
 // represents costs that could be associated with an incoming activity
 //easyjson:json
 type Cost struct {
-	Amount   Amount
-	CostType CostType
+	Amount   Amount   `thrift:",1"`
+	CostType CostType `thrift:",2"`
 }
 
 // IsDefined implements easyjson.Optional to support "omitempty" json tag.

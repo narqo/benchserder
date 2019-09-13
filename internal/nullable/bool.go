@@ -3,8 +3,8 @@ package nullable
 import "database/sql"
 
 type Bool struct {
-	Bool  bool
-	Valid bool
+	Bool  bool `thrift:",1"`
+	Valid bool `thrift:",2"`
 }
 
 var (

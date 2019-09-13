@@ -1,8 +1,8 @@
 package nullable
 
 type String struct {
-	String string
-	Valid  bool
+	String string  `thrift:",1"`
+	Valid  bool    `thrift:",2"`
 }
 
 func NewString(s string) String {

@@ -3,8 +3,8 @@ package nullable
 import "strconv"
 
 type Int struct {
-	Int   int
-	Valid bool
+	Int   int              `thrift:",1"`
+	Valid bool             `thrift:",2"`
 }
 
 func NewInt(value int) Int {

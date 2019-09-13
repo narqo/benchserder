@@ -8,15 +8,15 @@ import (
 //easyjson:json
 type Amount struct {
 	// original values from the SDK
-	OriginalAmount   float64
-	OriginalCurrency string
+	OriginalAmount   float64 `thrift:",1"`
+	OriginalCurrency string  `thrift:",2"`
 
 	// converted to base currency USD
-	BaseAmount float64
+	BaseAmount float64 `thrift:",3"`
 
 	// converted to reporting currency as per app setting
-	ReportingAmount   float64
-	ReportingCurrency string
+	ReportingAmount   float64 `thrift:",4"`
+	ReportingCurrency string  `thrift:",5"`
 }
 
 func (amount Amount) String() string {
