@@ -3,6 +3,8 @@ package benchserder
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -21,19 +23,18 @@ var testEvents = []string{
 func TestEvent_MarshalUnmarshal(t *testing.T) {
 	for _, tc := range marshallers {
 		t.Run(fmt.Sprintf("marshaller=%s", tc.name), func(t *testing.T) {
-			tm := tc.marshaller()
 			for _, tf := range testEvents {
 				t.Run(fmt.Sprintf("file=%s", tf), func(t *testing.T) {
 					data := mustReadFile(t, tf)
 					event := &Event{}
 					require.NoError(t, json.Unmarshal(data, &event))
 
-					gotData, err := tm.marshalFunc(event)
+					gotData, err := tc.marshaller.Marshal(event)
 					require.NoError(t, err)
 					require.NotEmpty(t, gotData)
 
 					gotEvent := &Event{}
-					require.NoError(t, tm.unmarshalFunc(gotData, gotEvent))
+					require.NoError(t, tc.marshaller.Unmarshal(gotData, gotEvent))
 					//assert.Equal(t, event, gotEvent)
 
 					d1, _ := json.Marshal(event)
@@ -48,7 +49,6 @@ func TestEvent_MarshalUnmarshal(t *testing.T) {
 func BenchmarkEvent_Marshal(b *testing.B) {
 	for _, tc := range marshallers {
 		b.Run(fmt.Sprintf("marshaller=%s", tc.name), func(b *testing.B) {
-			tm := tc.marshaller()
 			for _, tf := range testEvents {
 				b.Run(fmt.Sprintf("file=%s", tf), func(b *testing.B) {
 					data := mustReadFile(b, tf)
@@ -57,7 +57,7 @@ func BenchmarkEvent_Marshal(b *testing.B) {
 					if err != nil {
 						b.Fatal(err)
 					}
-					benchmark_Marshal(b, tm, event)
+					benchmark_Marshal(b, tc.marshaller, event)
 				})
 			}
 		})
@@ -71,20 +71,19 @@ func BenchmarkEvent_Unmarshal(b *testing.B) {
 		if err := json.Unmarshal(data, event); err != nil {
 			b.Fatal(err)
 		}
-		return tm.marshalFunc(event)
+		return tm.Marshal(event)
 	}
 
 	for _, tc := range marshallers {
 		b.Run(fmt.Sprintf("marshaller=%s", tc.name), func(b *testing.B) {
-			tm := tc.marshaller()
 			for _, tf := range testEvents {
 				b.Run(fmt.Sprintf("file=%s", tf), func(b *testing.B) {
-					data, err := prepareData(tf, tm)
+					data, err := prepareData(tf, tc.marshaller)
 					if err != nil {
 						b.Fatal(err)
 					}
 					event := &Event{}
-					benchmark_Unmarshal(b, tm, data, event)
+					benchmark_Unmarshal(b, tc.marshaller, data, event)
 				})
 			}
 		})
@@ -94,7 +93,6 @@ func BenchmarkEvent_Unmarshal(b *testing.B) {
 func BenchmarkEvent_Compression(b *testing.B) {
 	for _, tc := range marshallers {
 		b.Run(fmt.Sprintf("marshaller=%s", tc.name), func(b *testing.B) {
-			tm := tc.marshaller()
 			for _, tf := range testEvents {
 				b.Run(fmt.Sprintf("file=%s", tf), func(b *testing.B) {
 					data := mustReadFile(b, tf)
@@ -103,7 +101,7 @@ func BenchmarkEvent_Compression(b *testing.B) {
 					if err != nil {
 						b.Fatal(err)
 					}
-					mData, err := tm.marshalFunc(event)
+					mData, err := tc.marshaller.Marshal(event)
 					if err != nil {
 						b.Fatal(err)
 					}
@@ -120,7 +118,7 @@ func benchmark_Marshal(b *testing.B, tm *testMarshaller, v interface{}) {
 	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		data, err := tm.marshalFunc(v)
+		data, err := tm.Marshal(v)
 		if err != nil {
 			b.Fatal(err)
 		}
@@ -134,7 +132,7 @@ func benchmark_Unmarshal(b *testing.B, tm *testMarshaller, data []byte, v interf
 	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		err := tm.unmarshalFunc(data, v)
+		err := tm.Unmarshal(data, v)
 		if err != nil {
 			b.Fatal(err)
 		}
@@ -142,4 +140,16 @@ func benchmark_Unmarshal(b *testing.B, tm *testMarshaller, data []byte, v interf
 			b.Fatal("unexpected nil value")
 		}
 	}
+}
+
+func readFile(tf string) ([]byte, error) {
+	return ioutil.ReadFile(filepath.Join("testdata", tf))
+}
+
+func mustReadFile(t testing.TB, tf string) []byte {
+	data, err := readFile(tf)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return data
 }
