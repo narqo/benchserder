@@ -1,6 +1,7 @@
 PKG := github.com/narqo/benchserder
 
 GO ?= go
+GOIMPORTS ?= goimports
 PROTOC ?= protoc
 
 BINDIR := $(CURDIR)/bin
@@ -24,15 +25,17 @@ generate-json:
 	$(BINDIR)/easyjson -no_std_marshalers event.go
 
 PROTO_FILES := $(shell find proto -name '*.proto')
+PB_GO_FILES := $(patsubst proto/$(PKG)/%.proto,%.pb.go,$(PROTO_FILES))
 
 .PHONY: generate-proto
-generate-proto:
-	for proto_file in $(PROTO_FILES); do \
-		$(PROTOC) \
-			-I proto:vendor \
-			--gogofaster_out=../../../ \
-			$$proto_file; \
-	done
+generate-proto: $(PB_GO_FILES)
+
+%.pb.go:
+	$(PROTOC) \
+		-I proto:vendor \
+		--gogofaster_out=../../../ \
+		$(addprefix proto/$(PKG)/,$(@:.pb.go=.proto))
+	$(GOIMPORTS) -w $(@)
 
 .PHONY: generate-proto-src
 generate-proto-src:
@@ -59,6 +62,7 @@ bootstrap:
 
 .PHONY: clean
 clean:
+	$(RM) $(PB_GO_FILES)
 	$(RM) -r proto
 
 .PHONY: distclean

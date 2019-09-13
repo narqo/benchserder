@@ -4,14 +4,14 @@
 package callback
 
 import (
-	"fmt"
-	"io"
-	"math"
+	fmt "fmt"
+	io "io"
+	math "math"
 	math_bits "math/bits"
-	"time"
+	time "time"
 
 	_ "github.com/gogo/protobuf/gogoproto"
-	"github.com/gogo/protobuf/proto"
+	proto "github.com/gogo/protobuf/proto"
 	github_com_gogo_protobuf_types "github.com/gogo/protobuf/types"
 	_ "github.com/golang/protobuf/ptypes/timestamp"
 	_ "github.com/narqo/benchserder/internal/engagementtype"
