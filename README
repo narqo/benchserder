@@ -1,0 +1,23 @@
+Run all benchmarks
+
+```
+% go test -mod=vendor ./ -run XX -bench .
+```
+
+Run benchmarks for specific marshaller
+
+```
+% go test -mod=vendor ./ -run XX -bench '/marshaller=easyjson'
+```
+
+Run benchmarks for specific file type
+
+```
+% go test -mod=vendor ./ -run XX -bench '//file=event_2K'
+```
+
+Run compression rate benchmarks
+
+```
+% go test -mod=vendor ./ -run XX -bench 'Compression'
+```
