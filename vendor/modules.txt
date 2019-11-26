@@ -61,6 +61,10 @@ github.com/modern-go/concurrent
 github.com/modern-go/reflect2
 # github.com/pmezard/go-difflib v1.0.0
 github.com/pmezard/go-difflib/difflib
+# github.com/pquerna/ffjson v0.0.0-20190930134022-aa0246cd15f7
+github.com/pquerna/ffjson/ffjson
+github.com/pquerna/ffjson/fflib/v1
+github.com/pquerna/ffjson/fflib/v1/internal
 # github.com/stretchr/testify v1.4.0
 github.com/stretchr/testify/assert
 github.com/stretchr/testify/require

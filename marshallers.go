@@ -9,6 +9,7 @@ import (
 	"github.com/golang/protobuf/proto"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/mailru/easyjson"
+	"github.com/pquerna/ffjson/ffjson"
 	"github.com/ugorji/go/codec"
 	"github.com/vmihailenco/msgpack/v4"
 	"go.mongodb.org/mongo-driver/bson"
@@ -59,6 +60,13 @@ var marshallers = []struct {
 		&testMarshaller{
 			Marshal:   jsoniter.ConfigCompatibleWithStandardLibrary.Marshal,
 			Unmarshal: jsoniter.ConfigCompatibleWithStandardLibrary.Unmarshal,
+		},
+	},
+	{
+		"ffjson",
+		&testMarshaller{
+			Marshal:   ffjson.MarshalFast,
+			Unmarshal: ffjson.UnmarshalFast,
 		},
 	},
 	{

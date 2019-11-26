@@ -23,6 +23,8 @@ test:
 .PHONY: generate-json
 generate-json:
 	$(BINDIR)/easyjson -no_std_marshalers event.go
+	$(BINDIR)/ffjson event.go \
+		&& sed -i'' -e 's/) UnmarshalJSON(/) UnmarshalFFJSON(/' -e ') MarshalJSON(/) MarshalFFJSON(' event_ffjson.go
 
 PROTO_FILES := $(shell find proto -name '*.proto')
 PB_GO_FILES := $(patsubst proto/$(PKG)/%.proto,%.pb.go,$(PROTO_FILES))
@@ -56,6 +58,7 @@ generate-proto-src:
 .PHONY: bootstrap
 bootstrap:
 	GO111MODULE=off GOBIN=$(BINDIR) $(GO) install ./vendor/github.com/mailru/easyjson/...
+	GO111MODULE=off GOBIN=$(BINDIR) $(GO) install ./vendor/github.com/pquerna/ffjson/...
 	GO111MODULE=off GOBIN=$(BINDIR) $(GO) install ./vendor/gopkg.in/src-d/proteus.v1/...
 	GO111MODULE=off GOBIN=$(BINDIR) $(GO) install ./vendor/github.com/gogo/protobuf/protoc-gen-gofast/...
 	GO111MODULE=off GOBIN=$(BINDIR) $(GO) install ./vendor/github.com/gogo/protobuf/protoc-gen-gogofaster/...

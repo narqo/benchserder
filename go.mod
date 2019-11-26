@@ -13,6 +13,7 @@ require (
 	github.com/mailru/easyjson v0.0.0-20190626092158-b2ccc519800e
 	github.com/mattn/go-colorable v0.1.2 // indirect
 	github.com/mattn/go-isatty v0.0.9 // indirect
+	github.com/pquerna/ffjson v0.0.0-20190930134022-aa0246cd15f7
 	github.com/stretchr/testify v1.4.0
 	github.com/tidwall/pretty v1.0.0 // indirect
 	github.com/ugorji/go/codec v1.1.7
