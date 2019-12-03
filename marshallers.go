@@ -10,6 +10,7 @@ import (
 	jsoniter "github.com/json-iterator/go"
 	"github.com/mailru/easyjson"
 	"github.com/pquerna/ffjson/ffjson"
+	segmentiojson "github.com/segmentio/encoding/json"
 	"github.com/ugorji/go/codec"
 	"github.com/vmihailenco/msgpack/v4"
 	"go.mongodb.org/mongo-driver/bson"
@@ -25,13 +26,6 @@ var marshallers = []struct {
 	marshaller *testMarshaller
 }{
 	{
-		"json",
-		&testMarshaller{
-			Marshal:   json.Marshal,
-			Unmarshal: json.Unmarshal,
-		},
-	},
-	{
 		"gob",
 		&testMarshaller{
 			Marshal: func(v interface{}) ([]byte, error) {
@@ -42,6 +36,13 @@ var marshallers = []struct {
 			Unmarshal: func(data []byte, v interface{}) error {
 				return gob.NewDecoder(bytes.NewReader(data)).Decode(v)
 			},
+		},
+	},
+	{
+		"json",
+		&testMarshaller{
+			Marshal:   json.Marshal,
+			Unmarshal: json.Unmarshal,
 		},
 	},
 	{
@@ -67,6 +68,13 @@ var marshallers = []struct {
 		&testMarshaller{
 			Marshal:   ffjson.MarshalFast,
 			Unmarshal: ffjson.UnmarshalFast,
+		},
+	},
+	{
+		"segmentio-json",
+		&testMarshaller{
+			Marshal:   segmentiojson.Marshal,
+			Unmarshal: segmentiojson.Unmarshal,
 		},
 	},
 	{
