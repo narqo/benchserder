@@ -1,3 +1,5 @@
+See marshallers.go for the list of tested marshallers.
+
 Run all benchmarks
 
 ```
