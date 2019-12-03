@@ -16,6 +16,12 @@ Run benchmarks for specific file type
 % go test -mod=vendor ./ -run XX -bench '//file=event_2K'
 ```
 
+Run marshaling benchmarks for some marshallers
+
+```
+% go test -mod=vendor ./ -run XX -bench 'Marshal/marshaller=(json|easyjson|segmentio-json)$/file=event_2K'
+```
+
 Run compression rate benchmarks
 
 ```
