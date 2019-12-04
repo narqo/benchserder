@@ -4,49 +4,31 @@
 package cbor
 
 import (
-	"errors"
 	"reflect"
 	"sort"
 	"strings"
-	"sync"
 )
 
-// fieldByIndex returns the nested field corresponding to the index.  It
-// allocates pointer to struct field if it is nil and settable.
-// reflect.Value.FieldByIndex() panics at nil pointer to unexported anonymous
-// field.  This function returns error.
-func fieldByIndex(v reflect.Value, index []int) (reflect.Value, error) {
-	for _, i := range index {
-		if v.Kind() == reflect.Ptr && v.Type().Elem().Kind() == reflect.Struct {
-			if v.IsNil() {
-				if !v.CanSet() {
-					return reflect.Value{}, errors.New("cbor: cannot set embedded pointer to unexported struct: " + v.Type().String())
-				}
-				v.Set(reflect.New(v.Type().Elem()))
-			}
-			v = v.Elem()
-		}
-		v = v.Field(i)
-	}
-	return v, nil
-}
-
 type field struct {
-	name      string
-	idx       []int
-	typ       reflect.Type
-	tagged    bool // used to choose dominant field (at the same level tagged fields dominate untagged fields)
-	omitempty bool // used to skip empty field
+	name          string
+	cborName      []byte
+	idx           []int
+	typ           reflect.Type
+	ef            encodeFunc
+	isUnmarshaler bool
+	tagged        bool // used to choose dominant field (at the same level tagged fields dominate untagged fields)
+	omitEmpty     bool // used to skip empty field
+	keyAsInt      bool // used to encode/decode field name as int
 }
 
 type fields []field
 
-func (s fields) Len() int {
-	return len(s)
+func (x fields) Len() int {
+	return len(x)
 }
 
-func (s fields) Swap(i, j int) {
-	s[i], s[j] = s[j], s[i]
+func (x fields) Swap(i, j int) {
+	x[i], x[j] = x[j], x[i]
 }
 
 // byIndex sorts fields by field idx at each level, breaking ties with idx depth.
@@ -54,17 +36,17 @@ type byIndex struct {
 	fields
 }
 
-func (s byIndex) Less(i, j int) bool {
-	iidx := s.fields[i].idx
-	jidx := s.fields[j].idx
-	for k, d := range iidx {
-		if k >= len(jidx) {
+func (x byIndex) Less(i, j int) bool {
+	iIdx := x.fields[i].idx
+	jIdx := x.fields[j].idx
+	for k, d := range iIdx {
+		if k >= len(jIdx) {
 			// fields[j].idx is a subset of fields[i].idx.
 			return false
 		}
-		if d != jidx[k] {
+		if d != jIdx[k] {
 			// fields[i].idx and fields[j].idx are different.
-			return d < jidx[k]
+			return d < jIdx[k]
 		}
 	}
 	// fields[i].idx is either the same as, or a subset of fields[j].idx.
@@ -76,71 +58,34 @@ type byNameLevelAndTag struct {
 	fields
 }
 
-func (s byNameLevelAndTag) Less(i, j int) bool {
-	if s.fields[i].name != s.fields[j].name {
-		return s.fields[i].name < s.fields[j].name
+func (x byNameLevelAndTag) Less(i, j int) bool {
+	if x.fields[i].name != x.fields[j].name {
+		return x.fields[i].name < x.fields[j].name
 	}
-	if len(s.fields[i].idx) != len(s.fields[j].idx) {
-		return len(s.fields[i].idx) < len(s.fields[j].idx)
+	if len(x.fields[i].idx) != len(x.fields[j].idx) {
+		return len(x.fields[i].idx) < len(x.fields[j].idx)
 	}
-	if s.fields[i].tagged != s.fields[j].tagged {
-		return s.fields[i].tagged
+	if x.fields[i].tagged != x.fields[j].tagged {
+		return x.fields[i].tagged
 	}
 	return i < j // Field i and j have the same name, depth, and tagged status. Nothing else matters.
 }
 
-// byCanonicalRule sorts fields by field name length and field name.
-type byCanonicalRule struct {
-	fields
-}
-
-func (s byCanonicalRule) Less(i, j int) bool {
-	if len(s.fields[i].name) != len(s.fields[j].name) {
-		return len(s.fields[i].name) < len(s.fields[j].name)
-	}
-	return s.fields[i].name <= s.fields[j].name
-}
-
-func getFieldNameOptionsFromTag(tag string) (string, string) {
-	if len(tag) == 0 {
-		return "", ""
-	}
-	commaIdx := strings.IndexByte(tag, byte(','))
-	if commaIdx == -1 {
-		return tag, ""
-	}
-	return tag[:commaIdx], tag[commaIdx+1:]
-}
-
-func hasFieldOptionFromTag(options, key string) bool {
-	if len(options) == 0 {
-		return false
-	}
-	idx := strings.Index(options, key)
-	if idx == -1 {
-		return false
-	}
-	return idx+len(key) == len(options) || options[idx+len(key)] == ','
-}
-
 // getFields returns a list of visible fields of struct type typ following Go
 // visibility rules for struct fields.
-func getFields(typ reflect.Type) fields {
-	// Inspired by Go JSON encoding package's typeFields() function in encoding/json/encode.go.
+func getFields(typ reflect.Type) (flds fields, structOptions string) {
+	// Inspired by typeFields() in stdlib's encoding/json/encode.go.
 
 	var current map[reflect.Type][][]int // key: struct type, value: field index of this struct type at the same level
 	next := map[reflect.Type][][]int{typ: nil}
-
 	visited := map[reflect.Type]bool{} // Inspected struct type at less nested levels.
-
-	var flds fields
 
 	for len(next) > 0 {
 		current, next = next, map[reflect.Type][][]int{}
 
-		for structType, structIdxSlice := range current {
-			if len(structIdxSlice) > 1 {
-				continue // Fields of the same type at the same level are ignored.
+		for structType, structIdx := range current {
+			if len(structIdx) > 1 {
+				continue // Fields of the same embedded struct type at the same level are ignored.
 			}
 
 			if visited[structType] {
@@ -149,8 +94,8 @@ func getFields(typ reflect.Type) fields {
 			visited[structType] = true
 
 			var fieldIdx []int
-			if len(structIdxSlice) > 0 {
-				fieldIdx = structIdxSlice[0]
+			if len(structIdx) > 0 {
+				fieldIdx = structIdx[0]
 			}
 
 			for i := 0; i < structType.NumField(); i++ {
@@ -169,11 +114,21 @@ func getFields(typ reflect.Type) fields {
 					}
 					// Nonexportable anonymous field of struct type can contain exportable fields for serialization.
 				} else if !exportable {
+					// Get special field "_" struct options
+					if f.Name == "_" {
+						tag := f.Tag.Get("cbor")
+						if tag != "-" {
+							structOptions = tag
+						}
+					}
 					// Nonexportable fields are ignored.
 					continue
 				}
 
 				tag := f.Tag.Get("cbor")
+				if tag == "" {
+					tag = f.Tag.Get("json")
+				}
 				if tag == "-" {
 					continue
 				}
@@ -183,8 +138,7 @@ func getFields(typ reflect.Type) fields {
 				idx[len(fieldIdx)] = i
 
 				tagged := len(tag) > 0
-				tagFieldName, tagOptions := getFieldNameOptionsFromTag(tag)
-				omitempty := hasFieldOptionFromTag(tagOptions, "omitempty")
+				tagFieldName, omitempty, keyasint := getFieldNameAndOptionsFromTag(tag)
 
 				fieldName := tagFieldName
 				if tagFieldName == "" {
@@ -192,7 +146,7 @@ func getFields(typ reflect.Type) fields {
 				}
 
 				if !f.Anonymous || ft.Kind() != reflect.Struct || len(tagFieldName) > 0 {
-					flds = append(flds, field{name: fieldName, idx: idx, typ: ft, tagged: tagged, omitempty: omitempty})
+					flds = append(flds, field{name: fieldName, idx: idx, typ: f.Type, tagged: tagged, omitEmpty: omitempty, keyAsInt: keyasint})
 					continue
 				}
 
@@ -220,54 +174,28 @@ func getFields(typ reflect.Type) fields {
 
 	sort.Sort(byIndex{visibleFields})
 
-	return visibleFields
+	return visibleFields, structOptions
 }
 
-type structFields struct {
-	typ             reflect.Type
-	fields          fields
-	canonicalFields fields
-}
-
-var (
-	structFieldsMu     sync.Mutex
-	cachedStructFields []structFields
-)
-
-func getStructFields(t reflect.Type, canonical bool) fields {
-	flds := fields(nil)
-
-	structFieldsMu.Lock()
-	for i := 0; i < len(cachedStructFields); i++ {
-		if cachedStructFields[i].typ == t {
-			if canonical {
-				if len(cachedStructFields[i].fields) != len(cachedStructFields[i].canonicalFields) {
-					canonicalFields := make(fields, len(cachedStructFields[i].fields))
-					copy(canonicalFields, cachedStructFields[i].fields)
-					sort.Sort(byCanonicalRule{canonicalFields})
-					cachedStructFields[i].canonicalFields = canonicalFields
-				}
-				flds = cachedStructFields[i].canonicalFields
-			} else {
-				flds = cachedStructFields[i].fields
-			}
-			break
-		}
+func getFieldNameAndOptionsFromTag(tag string) (name string, omitEmpty bool, keyAsInt bool) {
+	if len(tag) == 0 {
+		return
 	}
-	if flds == nil {
-		sfs := structFields{typ: t, fields: getFields(t)}
-		if canonical {
-			canonicalFields := make(fields, len(sfs.fields))
-			copy(canonicalFields, sfs.fields)
-			sort.Sort(byCanonicalRule{canonicalFields})
-			sfs.canonicalFields = canonicalFields
-			flds = sfs.canonicalFields
-		} else {
-			flds = sfs.fields
-		}
-		cachedStructFields = append(cachedStructFields, sfs)
+	idx := strings.Index(tag, ",")
+	if idx == -1 {
+		return tag, false, false
 	}
-	structFieldsMu.Unlock()
-
-	return flds
+	if idx > 0 {
+		name = tag[:idx]
+		tag = tag[idx:]
+	}
+	s := ",omitempty"
+	if idx = strings.Index(tag, s); idx >= 0 && (len(tag) == idx+len(s) || tag[idx+len(s)] == ',') {
+		omitEmpty = true
+	}
+	s = ",keyasint"
+	if idx = strings.Index(tag, s); idx >= 0 && (len(tag) == idx+len(s) || tag[idx+len(s)] == ',') {
+		keyAsInt = true
+	}
+	return
 }

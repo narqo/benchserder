@@ -4,7 +4,7 @@ go 1.13
 
 require (
 	github.com/fatih/color v1.7.0 // indirect
-	github.com/fxamacker/cbor v0.3.0
+	github.com/fxamacker/cbor v1.3.2
 	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/gogo/protobuf v1.3.0
 	github.com/golang/protobuf v1.3.2
