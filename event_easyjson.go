@@ -8,9 +8,6 @@ import (
 	jlexer "github.com/mailru/easyjson/jlexer"
 	jwriter "github.com/mailru/easyjson/jwriter"
 	callback "github.com/narqo/benchserder/internal/callback"
-	device "github.com/narqo/benchserder/internal/device"
-	engagementtype "github.com/narqo/benchserder/internal/engagementtype"
-	fraud "github.com/narqo/benchserder/internal/fraud"
 	money "github.com/narqo/benchserder/internal/money"
 	nullable "github.com/narqo/benchserder/internal/nullable"
 	time "time"
@@ -106,7 +103,7 @@ func easyjsonF642ad3eDecodeGithubComNarqoBenchserder(in *jlexer.Lexer, out *Even
 		case "ZoneOffset":
 			out.ZoneOffset = int(in.Int())
 		case "FraudKind":
-			out.FraudKind = fraud.Kind(in.Uint8())
+			out.FraudKind = callback.FraudKind(in.Uint8())
 		case "PingbackUrl":
 			out.PingbackUrl = string(in.String())
 		case "CallbackData":
@@ -338,7 +335,7 @@ func easyjsonF642ad3eDecodeGithubComNarqoBenchserderInternalCallback(in *jlexer.
 		case "ReferenceTag":
 			out.ReferenceTag = string(in.String())
 		case "EngagementType":
-			out.EngagementType = engagementtype.Type(in.Int())
+			out.EngagementType = callback.EngagementType(in.Int())
 		case "Tracker":
 			out.Tracker = string(in.String())
 		case "InstallTracker":
@@ -390,7 +387,7 @@ func easyjsonF642ad3eDecodeGithubComNarqoBenchserderInternalCallback(in *jlexer.
 		case "WinAdid":
 			out.WinAdid = string(in.String())
 		case "SimSlotIds":
-			easyjsonF642ad3eDecodeGithubComNarqoBenchserderInternalDevice(in, &out.SimSlotIds)
+			easyjsonF642ad3eDecodeGithubComNarqoBenchserderInternalCallback1(in, &out.SimSlotIds)
 		case "EventToken":
 			out.EventToken = string(in.String())
 		case "RevenueData":
@@ -464,7 +461,7 @@ func easyjsonF642ad3eDecodeGithubComNarqoBenchserderInternalCallback(in *jlexer.
 		case "ImpressionBased":
 			out.ImpressionBased = bool(in.Bool())
 		case "FraudKind":
-			out.FraudKind = fraud.Kind(in.Uint8())
+			out.FraudKind = callback.FraudKind(in.Uint8())
 		case "CpuType":
 			out.CpuType = string(in.String())
 		case "HardwareName":
@@ -943,7 +940,7 @@ func easyjsonF642ad3eEncodeGithubComNarqoBenchserderInternalCallback(out *jwrite
 		} else {
 			out.RawString(prefix)
 		}
-		easyjsonF642ad3eEncodeGithubComNarqoBenchserderInternalDevice(out, in.SimSlotIds)
+		easyjsonF642ad3eEncodeGithubComNarqoBenchserderInternalCallback1(out, in.SimSlotIds)
 	}
 	if in.EventToken != "" {
 		const prefix string = ",\"EventToken\":"
@@ -1845,7 +1842,7 @@ func easyjsonF642ad3eEncodeGithubComNarqoBenchserderInternalMoney1(out *jwriter.
 	}
 	out.RawByte('}')
 }
-func easyjsonF642ad3eDecodeGithubComNarqoBenchserderInternalDevice(in *jlexer.Lexer, out *device.SimSlotIds) {
+func easyjsonF642ad3eDecodeGithubComNarqoBenchserderInternalCallback1(in *jlexer.Lexer, out *callback.SimSlotIds) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -1922,7 +1919,7 @@ func easyjsonF642ad3eDecodeGithubComNarqoBenchserderInternalDevice(in *jlexer.Le
 		in.Consumed()
 	}
 }
-func easyjsonF642ad3eEncodeGithubComNarqoBenchserderInternalDevice(out *jwriter.Writer, in device.SimSlotIds) {
+func easyjsonF642ad3eEncodeGithubComNarqoBenchserderInternalCallback1(out *jwriter.Writer, in callback.SimSlotIds) {
 	out.RawByte('{')
 	first := true
 	_ = first

@@ -4,7 +4,6 @@ import (
 	"time"
 
 	"github.com/narqo/benchserder/internal/callback"
-	"github.com/narqo/benchserder/internal/fraud"
 	"github.com/narqo/benchserder/internal/money"
 	"github.com/narqo/benchserder/internal/nullable"
 )
@@ -43,14 +42,11 @@ type Event struct {
 	NullSdkLevel nullable.Int `json:"NullSdkLevel"`
 	ZoneOffset   int
 
-	// for attribution
-	FraudKind fraud.Kind `json:"FraudKind"`
+	FraudKind callback.FraudKind `json:"FraudKind"`
 
-	// for callbacks
 	PingbackUrl  string
 	CallbackData *callback.Data
 
-	// for insert
 	FirstOsName        string
 	FirstCountry       string
 	FirstDeviceType    string

@@ -1,6 +1,5 @@
-package device
+package callback
 
-//easyjson:json
 type SimSlotIds struct {
 	Imeis    []string
 	Meids    []string

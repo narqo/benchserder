@@ -8,11 +8,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/narqo/benchserder/internal/fraud"
+
+	"github.com/narqo/benchserder/internal/callback"
 	fflib "github.com/pquerna/ffjson/fflib/v1"
 )
 
-// MarshalJSON marshal bytes to json - template
+// MarshalFFJSON marshal bytes to json - template
 func (j *Event) MarshalFFJSON() ([]byte, error) {
 	var buf fflib.Buffer
 	if j == nil {
@@ -342,7 +343,7 @@ var ffjKeyEventImpressionBased = []byte("ImpressionBased")
 
 var ffjKeyEventDeviceReattributed = []byte("DeviceReattributed")
 
-// UnmarshalJSON umarshall json - template of ffjson
+// UnmarshalFFJSON umarshall json - template of ffjson
 func (j *Event) UnmarshalFFJSON(input []byte) error {
 	fs := fflib.NewFFLexer(input)
 	return j.UnmarshalJSONFFLexer(fs, fflib.FFParse_map_start)
@@ -1484,11 +1485,11 @@ handle_ZoneOffset:
 
 handle_FraudKind:
 
-	/* handler: j.FraudKind type=fraud.Kind kind=uint8 quoted=false*/
+	/* handler: j.FraudKind type=callback.FraudKind kind=uint8 quoted=false*/
 
 	{
 		if tok != fflib.FFTok_integer && tok != fflib.FFTok_null {
-			return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for Kind", tok))
+			return fs.WrapErr(fmt.Errorf("cannot unmarshal %s into Go value for FraudKind", tok))
 		}
 	}
 
@@ -1504,7 +1505,7 @@ handle_FraudKind:
 				return fs.WrapErr(err)
 			}
 
-			j.FraudKind = fraud.Kind(tval)
+			j.FraudKind = callback.FraudKind(tval)
 
 		}
 	}

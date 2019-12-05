@@ -5,7 +5,6 @@ import "github.com/gogo/protobuf/gogoproto/gogo.proto";
 import "google/protobuf/timestamp.proto";
 import "github.com/narqo/benchserder/internal/nullable/generated.proto";
 import "github.com/narqo/benchserder/internal/money/generated.proto";
-import "github.com/narqo/benchserder/internal/fraud/generated.proto";
 import "github.com/narqo/benchserder/internal/callback/generated.proto";
 
 option (gogoproto.protosizer_all) = true;
@@ -39,7 +38,7 @@ message Event {
 	string environment = 21;
 	github.com.narqo.benchserder.internal.nullable.Int null_sdk_level = 22 [(gogoproto.nullable) = false];
 	int64 zone_offset = 23 [(gogoproto.casttype) = "int"];
-	uint32 fraud_kind = 24 [(gogoproto.casttype) = "github.com/narqo/benchserder/internal/fraud.Kind"];
+	uint32 fraud_kind = 24 [(gogoproto.casttype) = "github.com/narqo/benchserder/internal/callback.FraudKind"];
 	string pingback_url = 25;
 	github.com.narqo.benchserder.internal.callback.Data callback_data = 26;
 	string first_os_name = 27;

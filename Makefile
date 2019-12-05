@@ -47,9 +47,6 @@ generate-proto-src:
 		$(BINDIR)/proteus proto \
 			-p $(PKG) \
 			-p $(PKG)/internal/callback \
-			-p $(PKG)/internal/device \
-			-p $(PKG)/internal/engagementtype \
-			-p $(PKG)/internal/fraud \
 			-p $(PKG)/internal/money \
 			-p $(PKG)/internal/nullable \
 			-f proto \

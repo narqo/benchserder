@@ -5,7 +5,6 @@ import (
 	"strconv"
 )
 
-//easyjson:json
 type Amount struct {
 	// original values from the SDK
 	OriginalAmount   float64

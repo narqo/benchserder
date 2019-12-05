@@ -2,24 +2,20 @@ syntax = "proto3";
 package github.com.narqo.benchserder.internal.callback;
 
 import "github.com/gogo/protobuf/gogoproto/gogo.proto";
-import "github.com/narqo/benchserder/internal/engagementtype/generated.proto";
-import "github.com/narqo/benchserder/internal/device/generated.proto";
 import "github.com/narqo/benchserder/internal/money/generated.proto";
 import "github.com/narqo/benchserder/internal/nullable/generated.proto";
-import "github.com/narqo/benchserder/internal/fraud/generated.proto";
 import "google/protobuf/timestamp.proto";
 
 option (gogoproto.protosizer_all) = true;
 option (gogoproto.sizer_all) = false;
 option go_package = "callback";
 
-// easyjson:json
 message Data {
 	option (gogoproto.goproto_getters) = false;
 	option (gogoproto.typedecl) = false;
 	bool terms_signed = 1;
 	string reference_tag = 2;
-	int64 engagement_type = 3 [(gogoproto.casttype) = "github.com/narqo/benchserder/internal/engagementtype.Type"];
+	int64 engagement_type = 3 [(gogoproto.casttype) = "EngagementType"];
 	string tracker = 4;
 	string install_tracker = 5;
 	string last_tracker = 6;
@@ -45,7 +41,7 @@ message Data {
 	string win_hwid = 26;
 	string win_naid = 27;
 	string win_adid = 28;
-	github.com.narqo.benchserder.internal.device.SimSlotIds sim_slot_ids = 29 [(gogoproto.nullable) = false];
+	github.com.narqo.benchserder.internal.callback.SimSlotIds sim_slot_ids = 29 [(gogoproto.nullable) = false];
 	string event_token = 30;
 	github.com.narqo.benchserder.internal.money.Amount revenue_data = 31 [(gogoproto.nullable) = false];
 	github.com.narqo.benchserder.internal.money.Cost cost = 32 [(gogoproto.nullable) = false];
@@ -82,7 +78,7 @@ message Data {
 	string search_term = 63;
 	string click_referer = 64;
 	bool impression_based = 65;
-	uint32 fraud_kind = 66 [(gogoproto.casttype) = "github.com/narqo/benchserder/internal/fraud.Kind"];
+	uint32 fraud_kind = 66 [(gogoproto.casttype) = "FraudKind"];
 	string cpu_type = 67;
 	string hardware_name = 68;
 	string network_type = 69;
@@ -119,5 +115,13 @@ message Data {
 	string ad_revenue_unit = 100;
 	string ad_revenue_placement = 101;
 	string ad_mediation_platform = 102;
+}
+
+message SimSlotIds {
+	option (gogoproto.goproto_getters) = false;
+	option (gogoproto.typedecl) = false;
+	repeated string imeis = 1;
+	repeated string meids = 2;
+	string device_id = 3;
 }
 
