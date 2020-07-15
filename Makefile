@@ -16,6 +16,10 @@ PATH := $(PATH):$(BINDIR)
 .PHONY: all
 all:
 
+.PHONY: bench
+bench:
+	$(GO) test -mod=vendor $(TESTFLAGS) -run XX -bench .
+
 .PHONY: test
 test:
 	$(GO) test -mod=vendor $(TESTFLAGS) ./...
