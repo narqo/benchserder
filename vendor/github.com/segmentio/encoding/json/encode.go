@@ -13,6 +13,8 @@ import (
 	"unsafe"
 )
 
+const hex = "0123456789abcdef"
+
 func (e encoder) encodeNull(b []byte, p unsafe.Pointer) ([]byte, error) {
 	return append(b, "null"...), nil
 }
@@ -77,8 +79,11 @@ func (e encoder) encodeFloat64(b []byte, p unsafe.Pointer) ([]byte, error) {
 }
 
 func (e encoder) encodeFloat(b []byte, f float64, bits int) ([]byte, error) {
-	if math.IsNaN(f) || math.IsInf(f, 0) {
-		return b, &UnsupportedValueError{Value: reflect.ValueOf(f), Str: "unsupported value"}
+	switch {
+	case math.IsNaN(f):
+		return b, &UnsupportedValueError{Value: reflect.ValueOf(f), Str: "NaN"}
+	case math.IsInf(f, 0):
+		return b, &UnsupportedValueError{Value: reflect.ValueOf(f), Str: "inf"}
 	}
 
 	// Convert as if by ES6 number to string conversion.
@@ -124,15 +129,12 @@ func (e encoder) encodeNumber(b []byte, p unsafe.Pointer) ([]byte, error) {
 }
 
 func (e encoder) encodeString(b []byte, p unsafe.Pointer) ([]byte, error) {
-	hex := "0123456789abcdef"
-
 	s := *(*string)(p)
 	i := 0
 	j := 0
+	escapeHTML := (e.flags & EscapeHTML) != 0
 
 	b = append(b, '"')
-
-	escapeHTML := (e.flags & EscapeHTML) != 0
 
 	for j < len(s) {
 		c := s[j]
@@ -235,8 +237,7 @@ func (e encoder) encodeToString(b []byte, p unsafe.Pointer, encode encodeFunc) (
 	}
 
 	j := len(b)
-	x := b[i:]
-	s := *(*string)(unsafe.Pointer(&x))
+	s := b[i:]
 
 	if b, err = e.encodeString(b, unsafe.Pointer(&s)); err != nil {
 		return b, err
@@ -527,6 +528,7 @@ func (e encoder) encodeMapStringRawMessage(b []byte, p unsafe.Pointer) ([]byte, 
 func (e encoder) encodeStruct(b []byte, p unsafe.Pointer, st *structType) ([]byte, error) {
 	var start = len(b)
 	var err error
+	var k string
 	var n int
 	b = append(b, '{')
 
@@ -542,13 +544,19 @@ func (e encoder) encodeStruct(b []byte, p unsafe.Pointer, st *structType) ([]byt
 			b = append(b, ',')
 		}
 
-		k := len(b)
-		b, _ = e.encodeString(b, unsafe.Pointer(&f.name))
+		if (e.flags & EscapeHTML) != 0 {
+			k = f.html
+		} else {
+			k = f.json
+		}
+
+		lengthBeforeKey := len(b)
+		b = append(b, k...)
 		b = append(b, ':')
 
 		if b, err = f.codec.encode(e, b, v); err != nil {
 			if err == (rollback{}) {
-				b = b[:k]
+				b = b[:lengthBeforeKey]
 				continue
 			}
 			return b[:start], err
@@ -584,7 +592,11 @@ func (e encoder) encodeInterface(b []byte, p unsafe.Pointer) ([]byte, error) {
 	return Append(b, *(*interface{})(p), e.flags)
 }
 
-func (e encoder) encodeUnsupportedType(b []byte, p unsafe.Pointer, t reflect.Type) ([]byte, error) {
+func (e encoder) encodeMaybeEmptyInterface(b []byte, p unsafe.Pointer, t reflect.Type) ([]byte, error) {
+	return Append(b, reflect.NewAt(t, p).Elem().Interface(), e.flags)
+}
+
+func (e encoder) encodeUnsupportedTypeError(b []byte, p unsafe.Pointer, t reflect.Type) ([]byte, error) {
 	return b, &UnsupportedTypeError{Type: t}
 }
 
@@ -595,9 +607,16 @@ func (e encoder) encodeRawMessage(b []byte, p unsafe.Pointer) ([]byte, error) {
 		return append(b, "null"...), nil
 	}
 
-	s, _, err := parseValue(v)
-	if err != nil {
-		return b, &UnsupportedValueError{Value: reflect.ValueOf(v), Str: err.Error()}
+	var s []byte
+
+	if (e.flags & TrustRawMessage) != 0 {
+		s = v
+	} else {
+		var err error
+		s, _, err = parseValue(v)
+		if err != nil {
+			return b, &UnsupportedValueError{Value: reflect.ValueOf(v), Str: err.Error()}
+		}
 	}
 
 	if (e.flags & EscapeHTML) != 0 {
@@ -615,7 +634,7 @@ func (e encoder) encodeJSONMarshaler(b []byte, p unsafe.Pointer, t reflect.Type,
 	}
 
 	switch v.Kind() {
-	case reflect.Ptr, reflect.Map, reflect.Interface, reflect.Slice:
+	case reflect.Ptr, reflect.Interface:
 		if v.IsNil() {
 			return append(b, "null"...), nil
 		}
@@ -646,9 +665,9 @@ func (e encoder) encodeTextMarshaler(b []byte, p unsafe.Pointer, t reflect.Type,
 	}
 
 	switch v.Kind() {
-	case reflect.Ptr, reflect.Map, reflect.Interface, reflect.Slice:
+	case reflect.Ptr, reflect.Interface:
 		if v.IsNil() {
-			return append(b, `""`...), nil
+			return append(b, `null`...), nil
 		}
 	}
 
@@ -661,7 +680,6 @@ func (e encoder) encodeTextMarshaler(b []byte, p unsafe.Pointer, t reflect.Type,
 }
 
 func appendCompactEscapeHTML(dst []byte, src []byte) []byte {
-	const hex = "0123456789abcdef"
 	start := 0
 	escape := false
 	inString := false

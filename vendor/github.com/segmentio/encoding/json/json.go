@@ -31,13 +31,8 @@ type Number = json.Number
 // RawMessage is documented at https://golang.org/pkg/encoding/json/#RawMessage
 type RawMessage = json.RawMessage
 
-// SyntaxError is documented at https://golang.org/pkg/encoding/json/#SyntaxError
-type SyntaxError struct {
-	msg    string // description of error
-	Offset int64  // error occurred after reading Offset bytes
-}
-
-func (e *SyntaxError) Error() string { return e.msg }
+// A SyntaxError is a description of a JSON syntax error.
+type SyntaxError = json.SyntaxError
 
 // Token is documented at https://golang.org/pkg/encoding/json/#Token
 type Token = json.Token
@@ -69,6 +64,11 @@ const (
 	// encoding JSON (this matches the behavior of the standard encoding/json
 	// package).
 	SortMapKeys
+
+	// TrustRawMessage is a performance optimization flag to skip value
+	// checking of raw messages. It should only be used if the values are
+	// known to be valid json (e.g., they were created by json.Unmarshal).
+	TrustRawMessage
 )
 
 // ParseFlags is a type used to represent configuration options that can be
@@ -159,7 +159,17 @@ func Indent(dst *bytes.Buffer, src []byte, prefix, indent string) error {
 
 // Marshal is documented at https://golang.org/pkg/encoding/json/#Marshal
 func Marshal(x interface{}) ([]byte, error) {
-	return Append(make([]byte, 0, 1024), x, EscapeHTML|SortMapKeys)
+	var err error
+	var buf = encoderBufferPool.Get().(*encoderBuffer)
+
+	if buf.data, err = Append(buf.data[:0], x, EscapeHTML|SortMapKeys); err != nil {
+		return nil, err
+	}
+
+	b := make([]byte, len(buf.data))
+	copy(b, buf.data)
+	encoderBufferPool.Put(buf)
+	return b, nil
 }
 
 // MarshalIndent is documented at https://golang.org/pkg/encoding/json/#MarshalIndent
@@ -180,11 +190,14 @@ func MarshalIndent(x interface{}, prefix, indent string) ([]byte, error) {
 // Unmarshal is documented at https://golang.org/pkg/encoding/json/#Unmarshal
 func Unmarshal(b []byte, x interface{}) error {
 	r, err := Parse(b, x, 0)
-
-	if len(r) != 0 && err == nil {
-		err = syntaxError(r, "unexpected trailing tokens after json value")
+	if len(r) != 0 {
+		if _, ok := err.(*SyntaxError); !ok {
+			// The encoding/json package prioritizes reporting errors caused by
+			// unexpected trailing bytes over other issues; here we emulate this
+			// behavior by overriding the error.
+			err = syntaxError(r, "invalid character '%c' after top-level value", r[0])
+		}
 	}
-
 	return err
 }
 
@@ -195,7 +208,12 @@ func Parse(b []byte, x interface{}, flags ParseFlags) ([]byte, error) {
 	p := (*iface)(unsafe.Pointer(&x)).ptr
 
 	if t == nil || p == nil || t.Kind() != reflect.Ptr {
-		return b, &InvalidUnmarshalError{Type: t}
+		_, r, err := parseValue(skipSpaces(b))
+		r = skipSpaces(r)
+		if err != nil {
+			return r, err
+		}
+		return r, &InvalidUnmarshalError{Type: t}
 	}
 	t = t.Elem()
 
@@ -221,11 +239,12 @@ func Valid(data []byte) bool {
 
 // Decoder is documented at https://golang.org/pkg/encoding/json/#Decoder
 type Decoder struct {
-	reader io.Reader
-	buffer []byte
-	remain []byte
-	err    error
-	flags  ParseFlags
+	reader      io.Reader
+	buffer      []byte
+	remain      []byte
+	inputOffset int64
+	err         error
+	flags       ParseFlags
 }
 
 // NewDecoder is documented at https://golang.org/pkg/encoding/json/#NewDecoder
@@ -238,22 +257,12 @@ func (dec *Decoder) Buffered() io.Reader {
 
 // Decode is documented at https://golang.org/pkg/encoding/json/#Decoder.Decode
 func (dec *Decoder) Decode(v interface{}) error {
-	if dec.err != nil {
-		return dec.err
-	}
-
 	raw, err := dec.readValue()
 	if err != nil {
-		dec.err = err
 		return err
 	}
-
 	_, err = Parse(raw, v, dec.flags)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }
 
 const (
@@ -271,9 +280,23 @@ func (dec *Decoder) readValue() (v []byte, err error) {
 		if len(dec.remain) != 0 {
 			v, r, err = parseValue(dec.remain)
 			if err == nil {
-				dec.remain = skipSpaces(r)
+				dec.remain, n = skipSpacesN(r)
+				dec.inputOffset += int64(len(v) + n)
 				return
 			}
+			if len(r) != 0 {
+				// Parsing of the next JSON value stopped at a position other
+				// than the end of the input buffer, which indicaates that a
+				// syntax error was encountered.
+				return
+			}
+		}
+
+		if err = dec.err; err != nil {
+			if len(dec.remain) != 0 && err == io.EOF {
+				err = io.ErrUnexpectedEOF
+			}
+			return
 		}
 
 		if dec.buffer == nil {
@@ -289,14 +312,18 @@ func (dec *Decoder) readValue() (v []byte, err error) {
 			dec.buffer = buf
 		}
 
-		n, err = dec.reader.Read(dec.buffer[len(dec.buffer):cap(dec.buffer)])
+		n, err = io.ReadFull(dec.reader, dec.buffer[len(dec.buffer):cap(dec.buffer)])
 		if n > 0 {
 			dec.buffer = dec.buffer[:len(dec.buffer)+n]
+			if err != nil {
+				err = nil
+			}
+		} else if err == io.ErrUnexpectedEOF {
+			err = io.EOF
 		}
-		if err != nil && !(err == io.EOF && len(dec.buffer) != 0) {
-			return
-		}
-		dec.remain = skipSpaces(dec.buffer)
+		dec.remain, n = skipSpacesN(dec.buffer)
+		dec.inputOffset += int64(n)
+		dec.err = err
 	}
 }
 
@@ -333,6 +360,13 @@ func (dec *Decoder) DontMatchCaseInsensitiveStructFields() {
 // ZeroCopy is an extension to the standard encoding/json package which enables
 // all the copy optimizations of the decoder.
 func (dec *Decoder) ZeroCopy() { dec.flags |= ZeroCopy }
+
+// InputOffset returns the input stream byte offset of the current decoder position.
+// The offset gives the location of the end of the most recently returned token
+// and the beginning of the next token.
+func (dec *Decoder) InputOffset() int64 {
+	return dec.inputOffset
+}
 
 // Encoder is documented at https://golang.org/pkg/encoding/json/#Encoder
 type Encoder struct {
@@ -407,6 +441,17 @@ func (enc *Encoder) SetSortMapKeys(on bool) {
 		enc.flags |= SortMapKeys
 	} else {
 		enc.flags &= ^SortMapKeys
+	}
+}
+
+// SetTrustRawMessage skips value checking when encoding a raw json message. It should only
+// be used if the values are known to be valid json, e.g. because they were originally created
+// by json.Unmarshal.
+func (enc *Encoder) SetTrustRawMessage(on bool) {
+	if on {
+		enc.flags |= TrustRawMessage
+	} else {
+		enc.flags &= ^TrustRawMessage
 	}
 }
 

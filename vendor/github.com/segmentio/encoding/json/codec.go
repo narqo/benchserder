@@ -59,7 +59,7 @@ func typeid(t reflect.Type) unsafe.Pointer {
 }
 
 func constructCachedCodec(t reflect.Type, cache map[unsafe.Pointer]codec) codec {
-	c := constructCodec(t, map[reflect.Type]*structType{})
+	c := constructCodec(t, map[reflect.Type]*structType{}, t.Kind() == reflect.Ptr)
 
 	if inlined(t) {
 		c.encode = constructInlineValueEncodeFunc(c.encode)
@@ -69,7 +69,7 @@ func constructCachedCodec(t reflect.Type, cache map[unsafe.Pointer]codec) codec 
 	return c
 }
 
-func constructCodec(t reflect.Type, seen map[reflect.Type]*structType) (c codec) {
+func constructCodec(t reflect.Type, seen map[reflect.Type]*structType, canAddr bool) (c codec) {
 	switch t {
 	case nullType, nil:
 		c = codec{encode: encoder.encodeNull, decode: decoder.decodeNull}
@@ -155,8 +155,11 @@ func constructCodec(t reflect.Type, seen map[reflect.Type]*structType) (c codec)
 	case reflect.String:
 		c = codec{encode: encoder.encodeString, decode: decoder.decodeString}
 
+	case reflect.Interface:
+		c = constructInterfaceCodec(t)
+
 	case reflect.Array:
-		c = constructArrayCodec(t, seen)
+		c = constructArrayCodec(t, seen, canAddr)
 
 	case reflect.Slice:
 		c = constructSliceCodec(t, seen)
@@ -165,35 +168,36 @@ func constructCodec(t reflect.Type, seen map[reflect.Type]*structType) (c codec)
 		c = constructMapCodec(t, seen)
 
 	case reflect.Struct:
-		c = constructStructCodec(t, seen)
+		c = constructStructCodec(t, seen, canAddr)
 
 	case reflect.Ptr:
 		c = constructPointerCodec(t, seen)
 
 	default:
-		c = constructUnmarshalTypeErrorCodec(t)
+		c = constructUnsupportedTypeCodec(t)
 	}
 
 	p := reflect.PtrTo(t)
 
+	if canAddr {
+		switch {
+		case p.Implements(jsonMarshalerType):
+			c.encode = constructJSONMarshalerEncodeFunc(t, true)
+		case p.Implements(textMarshalerType):
+			c.encode = constructTextMarshalerEncodeFunc(t, true)
+		}
+	}
+
 	switch {
 	case t.Implements(jsonMarshalerType):
 		c.encode = constructJSONMarshalerEncodeFunc(t, false)
-
-	case p.Implements(jsonMarshalerType):
-		c.encode = constructJSONMarshalerEncodeFunc(t, true)
-
 	case t.Implements(textMarshalerType):
 		c.encode = constructTextMarshalerEncodeFunc(t, false)
-
-	case p.Implements(textMarshalerType):
-		c.encode = constructTextMarshalerEncodeFunc(t, true)
 	}
 
 	switch {
 	case p.Implements(jsonUnmarshalerType):
 		c.decode = constructJSONUnmarshalerDecodeFunc(t, true)
-
 	case p.Implements(textUnmarshalerType):
 		c.decode = constructTextUnmarshalerDecodeFunc(t, true)
 	}
@@ -201,8 +205,8 @@ func constructCodec(t reflect.Type, seen map[reflect.Type]*structType) (c codec)
 	return
 }
 
-func constructStringCodec(t reflect.Type, seen map[reflect.Type]*structType) codec {
-	c := constructCodec(t, seen)
+func constructStringCodec(t reflect.Type, seen map[reflect.Type]*structType, canAddr bool) codec {
+	c := constructCodec(t, seen, canAddr)
 	return codec{
 		encode: constructStringEncodeFunc(c.encode),
 		decode: constructStringDecodeFunc(c.decode),
@@ -221,9 +225,15 @@ func constructStringDecodeFunc(decode decodeFunc) decodeFunc {
 	}
 }
 
-func constructArrayCodec(t reflect.Type, seen map[reflect.Type]*structType) codec {
+func constructStringToIntDecodeFunc(t reflect.Type, decode decodeFunc) decodeFunc {
+	return func(d decoder, b []byte, p unsafe.Pointer) ([]byte, error) {
+		return d.decodeFromStringToInt(b, p, t, decode)
+	}
+}
+
+func constructArrayCodec(t reflect.Type, seen map[reflect.Type]*structType, canAddr bool) codec {
 	e := t.Elem()
-	c := constructCodec(e, seen)
+	c := constructCodec(e, seen, canAddr)
 	s := alignedSize(e)
 	return codec{
 		encode: constructArrayEncodeFunc(s, t, c.encode),
@@ -250,12 +260,12 @@ func constructSliceCodec(t reflect.Type, seen map[reflect.Type]*structType) code
 	s := alignedSize(e)
 
 	if e.Kind() == reflect.Uint8 {
-		p := reflect.PtrTo(e)
-		c := codec{}
-
 		// Go 1.7+ behavior: slices of byte types (and aliases) may override the
 		// default encoding and decoding behaviors by implementing marshaler and
 		// unmarshaler interfaces.
+		p := reflect.PtrTo(e)
+		c := codec{}
+
 		switch {
 		case e.Implements(jsonMarshalerType):
 			c.encode = constructJSONMarshalerEncodeFunc(e, false)
@@ -293,7 +303,7 @@ func constructSliceCodec(t reflect.Type, seen map[reflect.Type]*structType) code
 		return c
 	}
 
-	c := constructCodec(e, seen)
+	c := constructCodec(e, seen, true)
 	return codec{
 		encode: constructSliceEncodeFunc(s, t, c.encode),
 		decode: constructSliceDecodeFunc(s, t, c.decode),
@@ -333,7 +343,7 @@ func constructMapCodec(t reflect.Type, seen map[reflect.Type]*structType) codec 
 	}
 
 	kc := codec{}
-	vc := constructCodec(v, seen)
+	vc := constructCodec(v, seen, false)
 
 	if k.Implements(textMarshalerType) || reflect.PtrTo(k).Implements(textUnmarshalerType) {
 		kc.encode = constructTextMarshalerEncodeFunc(k, false)
@@ -363,10 +373,10 @@ func constructMapCodec(t reflect.Type, seen map[reflect.Type]*structType) codec 
 			reflect.Int16,
 			reflect.Int32,
 			reflect.Int64:
-			kc = constructStringCodec(k, seen)
+			kc = constructStringCodec(k, seen, false)
 
 			sortKeys = func(keys []reflect.Value) {
-				sort.Slice(keys, func(i, j int) bool { return keys[i].Int() < keys[j].Int() })
+				sort.Slice(keys, func(i, j int) bool { return intStringsAreSorted(keys[i].Int(), keys[j].Int()) })
 			}
 
 		case reflect.Uint,
@@ -375,19 +385,18 @@ func constructMapCodec(t reflect.Type, seen map[reflect.Type]*structType) codec 
 			reflect.Uint16,
 			reflect.Uint32,
 			reflect.Uint64:
-			kc = constructStringCodec(k, seen)
+			kc = constructStringCodec(k, seen, false)
 
 			sortKeys = func(keys []reflect.Value) {
-				sort.Slice(keys, func(i, j int) bool { return keys[i].Uint() < keys[j].Uint() })
+				sort.Slice(keys, func(i, j int) bool { return uintStringsAreSorted(keys[i].Uint(), keys[j].Uint()) })
 			}
 
 		default:
-			return constructUnmarshalTypeErrorCodec(t)
+			return constructUnsupportedTypeCodec(t)
 		}
 	}
 
-	switch v.Kind() {
-	case reflect.Ptr, reflect.Map:
+	if inlined(v) {
 		vc.encode = constructInlineValueEncodeFunc(vc.encode)
 	}
 
@@ -413,15 +422,15 @@ func constructMapDecodeFunc(t reflect.Type, decodeKey, decodeValue decodeFunc) d
 	}
 }
 
-func constructStructCodec(t reflect.Type, seen map[reflect.Type]*structType) codec {
-	st := constructStructType(t, seen)
+func constructStructCodec(t reflect.Type, seen map[reflect.Type]*structType, canAddr bool) codec {
+	st := constructStructType(t, seen, canAddr)
 	return codec{
 		encode: constructStructEncodeFunc(st),
 		decode: constructStructDecodeFunc(st),
 	}
 }
 
-func constructStructType(t reflect.Type, seen map[reflect.Type]*structType) *structType {
+func constructStructType(t reflect.Type, seen map[reflect.Type]*structType, canAddr bool) *structType {
 	// Used for preventing infinite recursion on types that have pointers to
 	// themselves.
 	st := seen[t]
@@ -435,7 +444,7 @@ func constructStructType(t reflect.Type, seen map[reflect.Type]*structType) *str
 		}
 
 		seen[t] = st
-		st.fields = appendStructFields(st.fields, t, 0, seen)
+		st.fields = appendStructFields(st.fields, t, 0, seen, canAddr)
 
 		for i := range st.fields {
 			f := &st.fields[i]
@@ -483,7 +492,7 @@ func constructEmbeddedStructPointerDecodeFunc(t reflect.Type, unexported bool, o
 	}
 }
 
-func appendStructFields(fields []structField, t reflect.Type, offset uintptr, seen map[reflect.Type]*structType) []structField {
+func appendStructFields(fields []structField, t reflect.Type, offset uintptr, seen map[reflect.Type]*structType, canAddr bool) []structField {
 	type embeddedField struct {
 		index      int
 		offset     uintptr
@@ -548,7 +557,7 @@ func appendStructFields(fields []structField, t reflect.Type, offset uintptr, se
 				// up by offset from the address of the wrapping object, so we
 				// simply add the embedded struct fields to the list of fields
 				// of the current struct type.
-				subtype := constructStructType(typ, seen)
+				subtype := constructStructType(typ, seen, canAddr)
 
 				for j := range subtype.fields {
 					embedded = append(embedded, embeddedField{
@@ -569,7 +578,7 @@ func appendStructFields(fields []structField, t reflect.Type, offset uintptr, se
 			}
 		}
 
-		codec := constructCodec(f.Type, seen)
+		codec := constructCodec(f.Type, seen, canAddr)
 
 		if stringify {
 			// https://golang.org/pkg/encoding/json/#Marshal
@@ -586,8 +595,7 @@ func appendStructFields(fields []structField, t reflect.Type, offset uintptr, se
 			}
 
 			switch typ.Kind() {
-			case reflect.Bool,
-				reflect.Int,
+			case reflect.Int,
 				reflect.Int8,
 				reflect.Int16,
 				reflect.Int32,
@@ -597,7 +605,10 @@ func appendStructFields(fields []structField, t reflect.Type, offset uintptr, se
 				reflect.Uint8,
 				reflect.Uint16,
 				reflect.Uint32,
-				reflect.Uint64,
+				reflect.Uint64:
+				codec.encode = constructStringEncodeFunc(codec.encode)
+				codec.decode = constructStringToIntDecodeFunc(typ, codec.decode)
+			case reflect.Bool,
 				reflect.Float32,
 				reflect.Float64,
 				reflect.String:
@@ -607,13 +618,13 @@ func appendStructFields(fields []structField, t reflect.Type, offset uintptr, se
 		}
 
 		fields = append(fields, structField{
-			name:      name,
-			index:     i << 32,
-			offset:    offset + f.Offset,
 			codec:     codec,
+			offset:    offset + f.Offset,
 			empty:     emptyFuncOf(f.Type),
 			tag:       tag,
 			omitempty: omitempty,
+			name:      name,
+			index:     i << 32,
 			typ:       f.Type,
 			zero:      reflect.Zero(f.Type),
 		})
@@ -663,13 +674,25 @@ func appendStructFields(fields []structField, t reflect.Type, offset uintptr, se
 		fields = append(fields, subfield)
 	}
 
+	for i := range fields {
+		fields[i].json = encodeString(fields[i].name, 0)
+		fields[i].html = encodeString(fields[i].name, EscapeHTML)
+	}
+
 	sort.Slice(fields, func(i, j int) bool { return fields[i].index < fields[j].index })
 	return fields
 }
 
+func encodeString(s string, flags AppendFlags) string {
+	b := make([]byte, 0, len(s)+2)
+	e := encoder{flags: flags}
+	b, _ = e.encodeString(b, unsafe.Pointer(&s))
+	return *(*string)(unsafe.Pointer(&b))
+}
+
 func constructPointerCodec(t reflect.Type, seen map[reflect.Type]*structType) codec {
 	e := t.Elem()
-	c := constructCodec(e, seen)
+	c := constructCodec(e, seen, true)
 	return codec{
 		encode: constructPointerEncodeFunc(e, c.encode),
 		decode: constructPointerDecodeFunc(e, c.decode),
@@ -688,20 +711,39 @@ func constructPointerDecodeFunc(t reflect.Type, decode decodeFunc) decodeFunc {
 	}
 }
 
-func constructUnmarshalTypeErrorCodec(t reflect.Type) codec {
+func constructInterfaceCodec(t reflect.Type) codec {
 	return codec{
-		encode: constructUnmarshalTypeErrorEncodeFunc(t),
-		decode: constructUnmarshalTypeErrorDecodeFunc(t),
+		encode: constructMaybeEmptyInterfaceEncoderFunc(t),
+		decode: constructMaybeEmptyInterfaceDecoderFunc(t),
 	}
 }
 
-func constructUnmarshalTypeErrorEncodeFunc(t reflect.Type) encodeFunc {
+func constructMaybeEmptyInterfaceEncoderFunc(t reflect.Type) encodeFunc {
 	return func(e encoder, b []byte, p unsafe.Pointer) ([]byte, error) {
-		return e.encodeUnsupportedType(b, p, t)
+		return e.encodeMaybeEmptyInterface(b, p, t)
 	}
 }
 
-func constructUnmarshalTypeErrorDecodeFunc(t reflect.Type) decodeFunc {
+func constructMaybeEmptyInterfaceDecoderFunc(t reflect.Type) decodeFunc {
+	return func(d decoder, b []byte, p unsafe.Pointer) ([]byte, error) {
+		return d.decodeMaybeEmptyInterface(b, p, t)
+	}
+}
+
+func constructUnsupportedTypeCodec(t reflect.Type) codec {
+	return codec{
+		encode: constructUnsupportedTypeEncodeFunc(t),
+		decode: constructUnsupportedTypeDecodeFunc(t),
+	}
+}
+
+func constructUnsupportedTypeEncodeFunc(t reflect.Type) encodeFunc {
+	return func(e encoder, b []byte, p unsafe.Pointer) ([]byte, error) {
+		return e.encodeUnsupportedTypeError(b, p, t)
+	}
+}
+
+func constructUnsupportedTypeDecodeFunc(t reflect.Type) decodeFunc {
 	return func(d decoder, b []byte, p unsafe.Pointer) ([]byte, error) {
 		return d.decodeUnmarshalTypeError(b, p, t)
 	}
@@ -872,15 +914,17 @@ type structType struct {
 }
 
 type structField struct {
-	name      string
-	index     int
-	offset    uintptr
 	codec     codec
+	offset    uintptr
 	empty     emptyFunc
 	tag       bool
 	omitempty bool
+	json      string
+	html      string
+	name      string
 	typ       reflect.Type
 	zero      reflect.Value
+	index     int
 }
 
 func unmarshalTypeError(b []byte, t reflect.Type) error {
@@ -891,19 +935,53 @@ func unmarshalOverflow(b []byte, t reflect.Type) error {
 	return &UnmarshalTypeError{Value: "number " + prefix(b) + " overflows", Type: t}
 }
 
-func syntaxError(b []byte, msg string, args ...interface{}) error {
-	e := new(SyntaxError)
-	t := reflect.TypeOf(e).Elem()
-	p := unsafe.Pointer(e)
+func unexpectedEOF(b []byte) error {
+	return syntaxError(b, "unexpected end of JSON input")
+}
 
+var syntaxErrorMsgOffset = ^uintptr(0)
+
+func init() {
+	t := reflect.TypeOf(SyntaxError{})
 	for i, n := 0, t.NumField(); i < n; i++ {
 		if f := t.Field(i); f.Type.Kind() == reflect.String {
-			// Hack to set the unexported `msg` field.
-			*(*string)(unsafe.Pointer(uintptr(p) + f.Offset)) = "json: " + fmt.Sprintf(msg, args...) + ": " + prefix(b)
+			syntaxErrorMsgOffset = f.Offset
 		}
 	}
+}
 
+func syntaxError(b []byte, msg string, args ...interface{}) error {
+	e := new(SyntaxError)
+	i := syntaxErrorMsgOffset
+	if i != ^uintptr(0) {
+		s := "json: " + fmt.Sprintf(msg, args...) + ": " + prefix(b)
+		p := unsafe.Pointer(e)
+		// Hack to set the unexported `msg` field.
+		*(*string)(unsafe.Pointer(uintptr(p) + i)) = s
+	}
 	return e
+}
+
+func inputError(b []byte, t reflect.Type) ([]byte, error) {
+	if len(b) == 0 {
+		return nil, unexpectedEOF(b)
+	}
+	_, r, err := parseValue(b)
+	if err != nil {
+		return r, err
+	}
+	return skipSpaces(r), unmarshalTypeError(b, t)
+}
+
+func objectKeyError(b []byte, err error) ([]byte, error) {
+	if len(b) == 0 {
+		return nil, unexpectedEOF(b)
+	}
+	switch err.(type) {
+	case *UnmarshalTypeError:
+		err = syntaxError(b, "invalid character '%c' looking for beginning of object key", b[0])
+	}
+	return b, err
 }
 
 func prefix(b []byte) string {
@@ -911,6 +989,16 @@ func prefix(b []byte) string {
 		return string(b)
 	}
 	return string(b[:32]) + "..."
+}
+
+func intStringsAreSorted(i0, i1 int64) bool {
+	var b0, b1 [32]byte
+	return string(strconv.AppendInt(b0[:0], i0, 10)) < string(strconv.AppendInt(b1[:0], i1, 10))
+}
+
+func uintStringsAreSorted(u0, u1 uint64) bool {
+	var b0, b1 [32]byte
+	return string(strconv.AppendUint(b0[:0], u0, 10)) < string(strconv.AppendUint(b1[:0], u1, 10))
 }
 
 //go:nosplit
@@ -932,11 +1020,12 @@ var (
 	int32Type = reflect.TypeOf(int32(0))
 	int64Type = reflect.TypeOf(int64(0))
 
-	uintType   = reflect.TypeOf(uint(0))
-	uint8Type  = reflect.TypeOf(uint8(0))
-	uint16Type = reflect.TypeOf(uint16(0))
-	uint32Type = reflect.TypeOf(uint32(0))
-	uint64Type = reflect.TypeOf(uint64(0))
+	uintType    = reflect.TypeOf(uint(0))
+	uint8Type   = reflect.TypeOf(uint8(0))
+	uint16Type  = reflect.TypeOf(uint16(0))
+	uint32Type  = reflect.TypeOf(uint32(0))
+	uint64Type  = reflect.TypeOf(uint64(0))
+	uintptrType = reflect.TypeOf(uintptr(0))
 
 	float32Type = reflect.TypeOf(float32(0))
 	float64Type = reflect.TypeOf(float64(0))
