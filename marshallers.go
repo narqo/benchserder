@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 
 	"github.com/fxamacker/cbor"
+	cborv2 "github.com/fxamacker/cbor/v2"
 	"github.com/golang/protobuf/proto"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/mailru/easyjson"
@@ -15,6 +16,14 @@ import (
 	"github.com/vmihailenco/msgpack/v4"
 	"go.mongodb.org/mongo-driver/bson"
 )
+
+var cborv2Encoder cborv2.EncMode
+
+func init() {
+	encOpts := cborv2.CanonicalEncOptions()
+	encOpts.Time = cborv2.TimeUnixDynamic
+	cborv2Encoder, _ = encOpts.EncMode()
+}
 
 type testMarshaller struct {
 	Marshal   func(interface{}) ([]byte, error)
@@ -164,6 +173,18 @@ var marshallers = []struct {
 			},
 			Unmarshal: func(data []byte, v interface{}) error {
 				return cbor.Unmarshal(data, v)
+			},
+		},
+	},
+	{
+		"fxamacker-cbor-v2",
+		&testMarshaller{
+			Marshal: func(v interface{}) ([]byte, error) {
+				//return cborv2.Marshal(v, cborv2.EncOptions{})
+				return cborv2Encoder.Marshal(v)
+			},
+			Unmarshal: func(data []byte, v interface{}) error {
+				return cborv2.Unmarshal(data, v)
 			},
 		},
 	},
