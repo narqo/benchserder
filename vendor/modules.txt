@@ -2,7 +2,7 @@
 github.com/davecgh/go-spew/spew
 # github.com/fatih/color v1.7.0
 github.com/fatih/color
-# github.com/fxamacker/cbor v1.3.2
+# github.com/fxamacker/cbor v1.5.1
 github.com/fxamacker/cbor
 # github.com/go-stack/stack v1.8.0
 github.com/go-stack/stack
@@ -80,6 +80,8 @@ github.com/vmihailenco/msgpack/v4/codes
 github.com/vmihailenco/tagparser
 github.com/vmihailenco/tagparser/internal
 github.com/vmihailenco/tagparser/internal/parser
+# github.com/x448/float16 v0.8.4
+github.com/x448/float16
 # go.mongodb.org/mongo-driver v1.1.0
 go.mongodb.org/mongo-driver/bson
 go.mongodb.org/mongo-driver/bson/bsoncodec

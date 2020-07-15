@@ -1,5 +1,5 @@
-// Copyright (c) 2019 Faye Amacker. All rights reserved.
-// Use of this source code is governed by a MIT license found in the LICENSE file.
+// Copyright (c) Faye Amacker. All rights reserved.
+// Licensed under the MIT License. See LICENSE in the project root for license information.
 
 package cbor
 
@@ -25,7 +25,7 @@ func NewDecoder(r io.Reader) *Decoder {
 
 // Decode reads the next CBOR-encoded value from its input and stores it in
 // the value pointed to by v.
-func (dec *Decoder) Decode(v interface{}) (err error) {
+func (dec *Decoder) Decode(v interface{}) error {
 	if len(dec.buf) == dec.off {
 		if n, err := dec.read(); n == 0 {
 			return err
@@ -33,7 +33,7 @@ func (dec *Decoder) Decode(v interface{}) (err error) {
 	}
 
 	dec.d.reset(dec.buf[dec.off:])
-	err = dec.d.value(v)
+	err := dec.d.value(v)
 	dec.off += dec.d.off
 	dec.bytesRead += dec.d.off
 	if err != nil {
@@ -111,6 +111,7 @@ func (enc *Encoder) Encode(v interface{}) error {
 	if err == nil {
 		_, err = enc.e.WriteTo(enc.w)
 	}
+	enc.e.Reset()
 	return err
 }
 
@@ -162,6 +163,9 @@ var cborIndefHeader = map[cborType][]byte{
 }
 
 func (enc *Encoder) startIndefinite(typ cborType) error {
+	if enc.opts.disableIndefiniteLength {
+		return errors.New("cbor: indefinite-length items are not allowed")
+	}
 	_, err := enc.w.Write(cborIndefHeader[typ])
 	if err == nil {
 		enc.indefTypes = append(enc.indefTypes, typ)

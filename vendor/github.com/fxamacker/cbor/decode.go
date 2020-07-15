@@ -1,5 +1,5 @@
-// Copyright (c) 2019 Faye Amacker. All rights reserved.
-// Use of this source code is governed by a MIT license found in the LICENSE file.
+// Copyright (c) Faye Amacker. All rights reserved.
+// Licensed under the MIT License. See LICENSE in the project root for license information.
 
 package cbor
 
@@ -13,6 +13,8 @@ import (
 	"strings"
 	"time"
 	"unicode/utf8"
+
+	"github.com/x448/float16"
 )
 
 // Unmarshal parses the CBOR-encoded data and stores the result in the value
@@ -156,16 +158,16 @@ func (d *decodeState) value(v interface{}) error {
 
 	rv = rv.Elem()
 
-	if rv.Kind() == reflect.Interface && rv.NumMethod() == 0 && rv.IsNil() {
+	if rv.Kind() == reflect.Interface && rv.NumMethod() == 0 {
 		// Fast path to decode to empty interface without calling implementsUnmarshaler.
-		iv, err := d.parseInterface()
+		iv, err := d.parse()
 		if iv != nil {
 			rv.Set(reflect.ValueOf(iv))
 		}
 		return err
 	}
 
-	return d.parse(rv, implementsUnmarshaler(rv.Type()))
+	return d.parseToValue(rv, implementsUnmarshaler(rv.Type()))
 }
 
 type cborType uint8
@@ -176,9 +178,9 @@ const (
 	cborTypeByteString  cborType = 0x40
 	cborTypeTextString  cborType = 0x60
 	cborTypeArray       cborType = 0x80
-	cborTypeMap         cborType = 0xA0
-	cborTypeTag         cborType = 0xC0
-	cborTypePrimitives  cborType = 0xE0
+	cborTypeMap         cborType = 0xa0
+	cborTypeTag         cborType = 0xc0
+	cborTypePrimitives  cborType = 0xe0
 )
 
 func (t cborType) String() string {
@@ -204,25 +206,26 @@ func (t cborType) String() string {
 	}
 }
 
-// parse assumes data is well-formed, and does not perform bounds checking.
-func (d *decodeState) parse(v reflect.Value, isUnmarshaler bool) (err error) {
-	if v.Kind() == reflect.Interface && v.NumMethod() == 0 && v.IsNil() {
-		// nil interface
-		iv, err := d.parseInterface()
-		if err != nil {
-			return err
-		}
+// parseToValue assumes data is well-formed, and does not perform bounds checking.
+func (d *decodeState) parseToValue(v reflect.Value, isUnmarshaler bool) error {
+	if isUnmarshaler {
+		return d.parseToUnmarshaler(v)
+	}
+
+	if v.Kind() == reflect.Interface && v.NumMethod() == 0 {
+		iv, err := d.parse()
 		if iv != nil {
 			v.Set(reflect.ValueOf(iv))
 		}
-		return nil
+		return err
 	}
 
 	// Create new value for the pointer v to point to if CBOR value is not nil/undefined.
-	if d.data[d.off] != 0xf6 && d.data[d.off] != 0xf7 {
+	if !d.nextCBORNil() {
 		for v.Kind() == reflect.Ptr {
 			if v.IsNil() {
 				if !v.CanSet() {
+					d.skip()
 					return errors.New("cbor: cannot set new value for " + v.Type().String())
 				}
 				v.Set(reflect.New(v.Type().Elem()))
@@ -231,60 +234,42 @@ func (d *decodeState) parse(v reflect.Value, isUnmarshaler bool) (err error) {
 		}
 	}
 
-	if isUnmarshaler {
-		v1 := v
-		if v1.Kind() != reflect.Ptr && v1.CanAddr() {
-			v1 = v1.Addr()
-		}
-		if v1.Kind() == reflect.Ptr && !v1.IsNil() {
-			if u, ok := v1.Interface().(Unmarshaler); ok {
-				start := d.off
-				d.skip()
-				return u.UnmarshalCBOR(d.data[start:d.off])
-			}
-		}
-	}
-
-	// Process byte/text string.
-	t := cborType(d.data[d.off] & 0xE0)
-	if t == cborTypeByteString {
-		b := d.parseByteString()
-		return fillByteString(t, b, v)
-	} else if t == cborTypeTextString {
-		b, err := d.parseTextString()
-		if err != nil {
-			return err
-		}
-		return fillTextString(t, b, v)
-	}
-
-	t, ai, val := d.getHeader()
-
-	// Process other types.
+	t := d.nextCBORType()
 	switch t {
 	case cborTypePositiveInt:
+		_, _, val := d.getHead()
 		return fillPositiveInt(t, val, v)
 	case cborTypeNegativeInt:
+		_, _, val := d.getHead()
 		if val > math.MaxInt64 {
 			return &UnmarshalTypeError{Value: t.String(), Type: v.Type(), errMsg: "-1-" + strconv.FormatUint(val, 10) + " overflows Go's int64"}
 		}
 		nValue := int64(-1) ^ int64(val)
 		return fillNegativeInt(t, nValue, v)
+	case cborTypeByteString:
+		b := d.parseByteString()
+		return fillByteString(t, b, v)
+	case cborTypeTextString:
+		b, err := d.parseTextString()
+		if err != nil {
+			return err
+		}
+		return fillTextString(t, b, v)
 	case cborTypeTag:
-		return d.parse(v, isUnmarshaler)
+		d.getHead() // Skip tag number
+		return d.parseToValue(v, isUnmarshaler)
 	case cborTypePrimitives:
-		if ai < 20 {
-			return fillPositiveInt(t, uint64(ai), v)
+		_, ai, val := d.getHead()
+		if ai < 20 || ai == 24 {
+			return fillPositiveInt(t, uint64(val), v)
 		}
 		switch ai {
 		case 20, 21:
 			return fillBool(t, ai == 21, v)
 		case 22, 23:
 			return fillNil(t, v)
-		case 24:
-			return fillPositiveInt(t, uint64(val), v)
 		case 25:
-			f := uint16ToFloat64(uint16(val))
+			f := float64(float16.Frombits(uint16(val)).Float32())
 			return fillFloat(t, f, v)
 		case 26:
 			f := float64(math.Float32frombits(uint32(val)))
@@ -294,84 +279,96 @@ func (d *decodeState) parse(v reflect.Value, isUnmarshaler bool) (err error) {
 			return fillFloat(t, f, v)
 		}
 	case cborTypeArray:
-		valInt := int(val)
-		count := valInt
-		if ai == 31 {
-			count = -1
-		}
 		if v.Kind() == reflect.Slice {
-			return d.parseSlice(t, count, v)
+			return d.parseArrayToSlice(v)
 		} else if v.Kind() == reflect.Array {
-			return d.parseArray(t, count, v)
+			return d.parseArrayToArray(v)
 		} else if v.Kind() == reflect.Struct {
-			return d.parseStructFromArray(t, count, v)
+			return d.parseArrayToStruct(v)
 		}
-		hasSize := count >= 0
-		for i := 0; (hasSize && i < count) || (!hasSize && !d.foundBreak()); i++ {
-			d.skip()
-		}
+		d.skip()
 		return &UnmarshalTypeError{Value: t.String(), Type: v.Type()}
 	case cborTypeMap:
-		valInt := int(val)
-		count := valInt
-		if ai == 31 {
-			count = -1
-		}
 		if v.Kind() == reflect.Struct {
-			return d.parseStructFromMap(t, count, v)
+			return d.parseMapToStruct(v)
 		} else if v.Kind() == reflect.Map {
-			return d.parseMap(t, count, v)
+			return d.parseMapToMap(v)
 		}
-		hasSize := count >= 0
-		for i := 0; (hasSize && i < count*2) || (!hasSize && !d.foundBreak()); i++ {
-			d.skip()
-		}
+		d.skip()
 		return &UnmarshalTypeError{Value: t.String(), Type: v.Type()}
 	}
 	return nil
 }
 
-// parseInterface assumes data is well-formed, and does not perform bounds checking.
-func (d *decodeState) parseInterface() (_ interface{}, err error) {
-	// Process byte/text string.
-	t := cborType(d.data[d.off] & 0xE0)
-	if t == cborTypeByteString {
-		return d.parseByteString(), nil
-	} else if t == cborTypeTextString {
-		b, err := d.parseTextString()
-		if err != nil {
-			return nil, err
+// parseToUnmarshaler assumes data is well-formed, and does not perform bounds checking.
+func (d *decodeState) parseToUnmarshaler(v reflect.Value) error {
+	if !d.nextCBORNil() {
+		for v.Kind() == reflect.Ptr {
+			if v.IsNil() {
+				if !v.CanSet() {
+					d.skip()
+					return errors.New("cbor: cannot set new value for " + v.Type().String())
+				}
+				v.Set(reflect.New(v.Type().Elem()))
+			}
+			v = v.Elem()
 		}
-		return string(b), nil
+	} else {
+		if v.Kind() == reflect.Ptr && v.IsNil() {
+			d.skip()
+			return nil
+		}
 	}
 
-	t, ai, val := d.getHeader()
+	if v.Kind() != reflect.Ptr && v.CanAddr() {
+		v = v.Addr()
+	}
+	if u, ok := v.Interface().(Unmarshaler); ok {
+		start := d.off
+		d.skip()
+		return u.UnmarshalCBOR(d.data[start:d.off])
+	}
+	d.skip()
+	return errors.New("cbor: failed to assert " + v.Type().String() + " as cbor.Unmarshaler")
+}
 
-	// Process other types.
+// parse assumes data is well-formed, and does not perform bounds checking.
+func (d *decodeState) parse() (interface{}, error) {
+	t := d.nextCBORType()
 	switch t {
 	case cborTypePositiveInt:
+		_, _, val := d.getHead()
 		return val, nil
 	case cborTypeNegativeInt:
+		_, _, val := d.getHead()
 		if val > math.MaxInt64 {
 			return nil, &UnmarshalTypeError{Value: t.String(), Type: reflect.TypeOf([]interface{}(nil)).Elem(), errMsg: "-1-" + strconv.FormatUint(val, 10) + " overflows Go's int64"}
 		}
 		nValue := int64(-1) ^ int64(val)
 		return nValue, nil
+	case cborTypeByteString:
+		return d.parseByteString(), nil
+	case cborTypeTextString:
+		b, err := d.parseTextString()
+		if err != nil {
+			return nil, err
+		}
+		return string(b), nil
 	case cborTypeTag:
-		return d.parseInterface()
+		d.getHead() // Skip tag number
+		return d.parse()
 	case cborTypePrimitives:
-		if ai < 20 {
-			return uint64(ai), nil
+		_, ai, val := d.getHead()
+		if ai < 20 || ai == 24 {
+			return uint64(val), nil
 		}
 		switch ai {
 		case 20, 21:
 			return (ai == 21), nil
 		case 22, 23:
 			return nil, nil
-		case 24:
-			return uint64(val), nil
 		case 25:
-			f := uint16ToFloat64(uint16(val))
+			f := float64(float16.Frombits(uint16(val)).Float32())
 			return f, nil
 		case 26:
 			f := float64(math.Float32frombits(uint32(val)))
@@ -381,17 +378,9 @@ func (d *decodeState) parseInterface() (_ interface{}, err error) {
 			return f, nil
 		}
 	case cborTypeArray:
-		count := int(val)
-		if ai == 31 {
-			count = -1
-		}
-		return d.parseArrayInterface(t, count)
+		return d.parseArray()
 	case cborTypeMap:
-		count := int(val)
-		if ai == 31 {
-			count = -1
-		}
-		return d.parseMapInterface(t, count)
+		return d.parseMap()
 	}
 	return nil, nil
 }
@@ -399,14 +388,21 @@ func (d *decodeState) parseInterface() (_ interface{}, err error) {
 // parseByteString parses CBOR encoded byte string.  It returns a byte slice
 // pointing to a copy of parsed data.
 func (d *decodeState) parseByteString() []byte {
-	val, isCopy := d.parseStringBuf(nil)
-	if !isCopy {
-		// Make a copy of val so that GC can collect underlying data val points to.
-		copyVal := make([]byte, len(val))
-		copy(copyVal, val)
-		return copyVal
+	_, ai, val := d.getHead()
+	if ai != 31 {
+		b := make([]byte, int(val))
+		copy(b, d.data[d.off:d.off+int(val)])
+		d.off += int(val)
+		return b
 	}
-	return val
+	// Process indefinite length string chunks.
+	b := []byte{}
+	for !d.foundBreak() {
+		_, _, val = d.getHead()
+		b = append(b, d.data[d.off:d.off+int(val)]...)
+		d.off += int(val)
+	}
+	return b
 }
 
 // parseTextString parses CBOR encoded text string.  It does not return a string
@@ -415,57 +411,51 @@ func (d *decodeState) parseByteString() []byte {
 //
 // parseStruct() uses parseTextString() to improve memory and performance,
 // compared with using parse(reflect.Value).  parse(reflect.Value) sets
-// reflect.Value with parsed string, while parseTextString() returns parsed string.
+// reflect.Value with parsed string, while parseTextString() returns zero-copy []byte.
 func (d *decodeState) parseTextString() ([]byte, error) {
-	val, _ := d.parseStringBuf(nil)
-
-	if !utf8.Valid(val) {
-		return nil, &SemanticError{"cbor: invalid UTF-8 string"}
-	}
-
-	return val, nil
-}
-
-// parseStringBuf assumes data is well-formed, and does not perform bounds checking.
-func (d *decodeState) parseStringBuf(p []byte) (_ []byte, isCopy bool) {
-	t, ai, val := d.getHeader()
-
-	if t == cborTypeTag {
-		return d.parseStringBuf(p)
-	}
-
-	if ai == 31 {
-		// Process indefinite length string.
-		if p == nil {
-			p = make([]byte, 0, 64)
+	_, ai, val := d.getHead()
+	if ai != 31 {
+		b := d.data[d.off : d.off+int(val)]
+		d.off += int(val)
+		if !utf8.Valid(b) {
+			return nil, &SemanticError{"cbor: invalid UTF-8 string"}
 		}
+		return b, nil
+	}
+	// Process indefinite length string chunks.
+	b := []byte{}
+	var err error
+	for !d.foundBreak() {
+		_, _, val = d.getHead()
+		x := d.data[d.off : d.off+int(val)]
+		d.off += int(val)
+		if !utf8.Valid(x) {
+			err = &SemanticError{"cbor: invalid UTF-8 string"}
+			break
+		}
+		b = append(b, x...)
+	}
+	if err != nil {
 		for !d.foundBreak() {
-			p, _ = d.parseStringBuf(p)
+			d.skip() // Skip remaining chunk on error
 		}
-		return p, true
+		return nil, err
 	}
-
-	// Process definite length string.
-	oldOff, newOff := d.off, d.off+int(val)
-	d.off = newOff
-
-	if p != nil {
-		p = append(p, d.data[oldOff:newOff]...)
-		return p, true
-	}
-	return d.data[oldOff:newOff], false
+	return b, nil
 }
 
-func (d *decodeState) parseArrayInterface(t cborType, count int) ([]interface{}, error) {
-	hasSize := count >= 0
-	if count == -1 {
+func (d *decodeState) parseArray() ([]interface{}, error) {
+	_, ai, val := d.getHead()
+	hasSize := (ai != 31)
+	count := int(val)
+	if !hasSize {
 		count = d.numOfItemsUntilBreak() // peek ahead to get array size to preallocate slice for better performance
 	}
 	v := make([]interface{}, count)
 	var e interface{}
 	var err, lastErr error
 	for i := 0; (hasSize && i < count) || (!hasSize && !d.foundBreak()); i++ {
-		if e, lastErr = d.parseInterface(); lastErr != nil {
+		if e, lastErr = d.parse(); lastErr != nil {
 			if err == nil {
 				err = lastErr
 			}
@@ -476,9 +466,11 @@ func (d *decodeState) parseArrayInterface(t cborType, count int) ([]interface{},
 	return v, err
 }
 
-func (d *decodeState) parseSlice(t cborType, count int, v reflect.Value) error {
-	hasSize := count >= 0
-	if count == -1 {
+func (d *decodeState) parseArrayToSlice(v reflect.Value) error {
+	_, ai, val := d.getHead()
+	hasSize := (ai != 31)
+	count := int(val)
+	if !hasSize {
 		count = d.numOfItemsUntilBreak() // peek ahead to get array size to preallocate slice for better performance
 	}
 	if count == 0 {
@@ -491,7 +483,7 @@ func (d *decodeState) parseSlice(t cborType, count int, v reflect.Value) error {
 	elemIsUnmarshaler := implementsUnmarshaler(v.Type().Elem())
 	var err error
 	for i := 0; (hasSize && i < count) || (!hasSize && !d.foundBreak()); i++ {
-		if lastErr := d.parse(v.Index(i), elemIsUnmarshaler); lastErr != nil {
+		if lastErr := d.parseToValue(v.Index(i), elemIsUnmarshaler); lastErr != nil {
 			if err == nil {
 				err = lastErr
 			}
@@ -500,13 +492,15 @@ func (d *decodeState) parseSlice(t cborType, count int, v reflect.Value) error {
 	return err
 }
 
-func (d *decodeState) parseArray(t cborType, count int, v reflect.Value) error {
-	hasSize := count >= 0
+func (d *decodeState) parseArrayToArray(v reflect.Value) error {
+	_, ai, val := d.getHead()
+	hasSize := (ai != 31)
+	count := int(val)
 	elemIsUnmarshaler := implementsUnmarshaler(v.Type().Elem())
 	i := 0
 	var err error
 	for ; i < v.Len() && ((hasSize && i < count) || (!hasSize && !d.foundBreak())); i++ {
-		if lastErr := d.parse(v.Index(i), elemIsUnmarshaler); lastErr != nil {
+		if lastErr := d.parseToValue(v.Index(i), elemIsUnmarshaler); lastErr != nil {
 			if err == nil {
 				err = lastErr
 			}
@@ -526,13 +520,15 @@ func (d *decodeState) parseArray(t cborType, count int, v reflect.Value) error {
 	return err
 }
 
-func (d *decodeState) parseMapInterface(t cborType, count int) (map[interface{}]interface{}, error) {
+func (d *decodeState) parseMap() (map[interface{}]interface{}, error) {
+	_, ai, val := d.getHead()
+	hasSize := (ai != 31)
+	count := int(val)
 	m := make(map[interface{}]interface{})
-	hasSize := count >= 0
 	var k, e interface{}
 	var err, lastErr error
 	for i := 0; (hasSize && i < count) || (!hasSize && !d.foundBreak()); i++ {
-		if k, lastErr = d.parseInterface(); lastErr != nil {
+		if k, lastErr = d.parse(); lastErr != nil {
 			if err == nil {
 				err = lastErr
 			}
@@ -547,7 +543,7 @@ func (d *decodeState) parseMapInterface(t cborType, count int) (map[interface{}]
 			d.skip()
 			continue
 		}
-		if e, lastErr = d.parseInterface(); lastErr != nil {
+		if e, lastErr = d.parse(); lastErr != nil {
 			if err == nil {
 				err = lastErr
 			}
@@ -558,15 +554,17 @@ func (d *decodeState) parseMapInterface(t cborType, count int) (map[interface{}]
 	return m, err
 }
 
-func (d *decodeState) parseMap(t cborType, count int, v reflect.Value) error {
+func (d *decodeState) parseMapToMap(v reflect.Value) error {
+	_, ai, val := d.getHead()
+	hasSize := (ai != 31)
+	count := int(val)
 	if v.IsNil() {
 		mapsize := count
-		if mapsize < 0 {
+		if !hasSize {
 			mapsize = 0
 		}
 		v.Set(reflect.MakeMapWithSize(v.Type(), mapsize))
 	}
-	hasSize := count >= 0
 	keyType, eleType := v.Type().Key(), v.Type().Elem()
 	reuseKey, reuseEle := isImmutableKind(keyType.Kind()), isImmutableKind(eleType.Kind())
 	var keyValue, eleValue, zeroKeyValue, zeroEleValue reflect.Value
@@ -583,7 +581,7 @@ func (d *decodeState) parseMap(t cborType, count int, v reflect.Value) error {
 			}
 			keyValue.Set(zeroKeyValue)
 		}
-		if lastErr = d.parse(keyValue, keyIsUnmarshaler); lastErr != nil {
+		if lastErr = d.parseToValue(keyValue, keyIsUnmarshaler); lastErr != nil {
 			if err == nil {
 				err = lastErr
 			}
@@ -606,7 +604,7 @@ func (d *decodeState) parseMap(t cborType, count int, v reflect.Value) error {
 			}
 			eleValue.Set(zeroEleValue)
 		}
-		if lastErr := d.parse(eleValue, elemIsUnmarshaler); lastErr != nil {
+		if lastErr := d.parseToValue(eleValue, elemIsUnmarshaler); lastErr != nil {
 			if err == nil {
 				err = lastErr
 			}
@@ -618,23 +616,23 @@ func (d *decodeState) parseMap(t cborType, count int, v reflect.Value) error {
 	return err
 }
 
-func (d *decodeState) parseStructFromArray(t cborType, count int, v reflect.Value) error {
+func (d *decodeState) parseArrayToStruct(v reflect.Value) error {
 	structType := getDecodingStructType(v.Type())
 	if !structType.toArray {
-		hasSize := count >= 0
-		for i := 0; (hasSize && i < count) || (!hasSize && !d.foundBreak()); i++ {
-			d.skip()
-		}
+		t := d.nextCBORType()
+		d.skip()
 		return &UnmarshalTypeError{Value: t.String(), Type: v.Type(), errMsg: "cannot decode CBOR array to struct without toarray option"}
 	}
-	hasSize := count >= 0
-	if count == -1 {
-		count = d.numOfItemsUntilBreak() // peek ahead to get array size to verify that array size matches number of fields
+	start := d.off
+	t, ai, val := d.getHead()
+	hasSize := (ai != 31)
+	count := int(val)
+	if !hasSize {
+		count = d.numOfItemsUntilBreak() // peek ahead to get array size to preallocate slice for better performance
 	}
 	if count != len(structType.fields) {
-		for i := 0; (hasSize && i < count) || (!hasSize && !d.foundBreak()); i++ {
-			d.skip()
-		}
+		d.off = start
+		d.skip()
 		return &UnmarshalTypeError{Value: t.String(), Type: v.Type(), errMsg: "cannot decode CBOR array to struct with different number of elements"}
 	}
 	var err error
@@ -647,7 +645,7 @@ func (d *decodeState) parseStructFromArray(t cborType, count int, v reflect.Valu
 			d.skip()
 			continue
 		}
-		if lastErr := d.parse(fv, structType.fields[i].isUnmarshaler); lastErr != nil {
+		if lastErr := d.parseToValue(fv, structType.fields[i].isUnmarshaler); lastErr != nil {
 			if err == nil {
 				if typeError, ok := lastErr.(*UnmarshalTypeError); ok {
 					typeError.Struct = v.Type().String()
@@ -662,15 +660,16 @@ func (d *decodeState) parseStructFromArray(t cborType, count int, v reflect.Valu
 	return err
 }
 
-func (d *decodeState) parseStructFromMap(t cborType, count int, v reflect.Value) error {
+func (d *decodeState) parseMapToStruct(v reflect.Value) error {
+	_, ai, val := d.getHead()
+	hasSize := (ai != 31)
+	count := int(val)
 	structType := getDecodingStructType(v.Type())
-
 	foundFldIdx := make([]bool, len(structType.fields))
-	hasSize := count >= 0
 	var err, lastErr error
 	for i := 0; (hasSize && i < count) || (!hasSize && !d.foundBreak()); i++ {
 		var keyBytes []byte
-		t := cborType(d.data[d.off] & 0xE0)
+		t := d.nextCBORType()
 		if t == cborTypeTextString {
 			keyBytes, lastErr = d.parseTextString()
 			if lastErr != nil {
@@ -681,7 +680,7 @@ func (d *decodeState) parseStructFromMap(t cborType, count int, v reflect.Value)
 				continue
 			}
 		} else if t == cborTypePositiveInt || t == cborTypeNegativeInt {
-			iv, lastErr := d.parseInterface()
+			iv, lastErr := d.parse()
 			if lastErr != nil {
 				if err == nil {
 					err = lastErr
@@ -739,7 +738,7 @@ func (d *decodeState) parseStructFromMap(t cborType, count int, v reflect.Value)
 			d.skip()
 			continue
 		}
-		if lastErr = d.parse(fv, f.isUnmarshaler); lastErr != nil {
+		if lastErr = d.parseToValue(fv, f.isUnmarshaler); lastErr != nil {
 			if err == nil {
 				if typeError, ok := lastErr.(*UnmarshalTypeError); ok {
 					typeError.Struct = v.Type().String()
@@ -757,8 +756,8 @@ func (d *decodeState) parseStructFromMap(t cborType, count int, v reflect.Value)
 // skip moves data offset to the next item.  skip assumes data is well-formed,
 // and does not perform bounds checking.
 func (d *decodeState) skip() {
-	t := cborType(d.data[d.off] & 0xE0)
-	ai := d.data[d.off] & 0x1F
+	t := cborType(d.data[d.off] & 0xe0)
+	ai := d.data[d.off] & 0x1f
 	val := uint64(ai)
 	d.off++
 
@@ -781,7 +780,7 @@ func (d *decodeState) skip() {
 		switch t {
 		case cborTypeByteString, cborTypeTextString, cborTypeArray, cborTypeMap:
 			for true {
-				if d.data[d.off] == 0xFF {
+				if d.data[d.off] == 0xff {
 					d.off++
 					return
 				}
@@ -806,10 +805,10 @@ func (d *decodeState) skip() {
 	}
 }
 
-// getHeader assumes data is well-formed, and does not perform bounds checking.
-func (d *decodeState) getHeader() (t cborType, ai byte, val uint64) {
-	t = cborType(d.data[d.off] & 0xE0)
-	ai = d.data[d.off] & 0x1F
+// getHead assumes data is well-formed, and does not perform bounds checking.
+func (d *decodeState) getHead() (t cborType, ai byte, val uint64) {
+	t = cborType(d.data[d.off] & 0xe0)
+	ai = d.data[d.off] & 0x1f
 	val = uint64(ai)
 	d.off++
 
@@ -843,7 +842,7 @@ func (d *decodeState) numOfItemsUntilBreak() int {
 
 // foundBreak assumes data is well-formed, and does not perform bounds checking.
 func (d *decodeState) foundBreak() bool {
-	if d.data[d.off] == 0xFF {
+	if d.data[d.off] == 0xff {
 		d.off++
 		return true
 	}
@@ -853,6 +852,14 @@ func (d *decodeState) foundBreak() bool {
 func (d *decodeState) reset(data []byte) {
 	d.data = data
 	d.off = 0
+}
+
+func (d *decodeState) nextCBORType() cborType {
+	return cborType(d.data[d.off] & 0xe0)
+}
+
+func (d *decodeState) nextCBORNil() bool {
+	return d.data[d.off] == 0xf6 || d.data[d.off] == 0xf7
 }
 
 var (
@@ -944,6 +951,10 @@ func fillFloat(t cborType, val float64, v reflect.Value) error {
 		return nil
 	}
 	if v.Type() == typeTime {
+		if math.IsNaN(val) || math.IsInf(val, 0) {
+			v.Set(reflect.ValueOf(time.Time{}))
+			return nil
+		}
 		f1, f2 := math.Modf(val)
 		tm := time.Unix(int64(f1), int64(f2*1e9))
 		v.Set(reflect.ValueOf(tm))
@@ -983,26 +994,6 @@ func fillTextString(t cborType, val []byte, v reflect.Value) error {
 		return nil
 	}
 	return &UnmarshalTypeError{Value: t.String(), Type: v.Type()}
-}
-
-func uint16ToFloat64(num uint16) float64 {
-	bits := uint32(num)
-
-	sign := bits >> 15
-	exp := bits >> 10 & 0x1F
-	frac := bits & 0x3FF
-
-	switch exp {
-	case 0:
-	case 0x1F:
-		exp = 0xFF
-	default:
-		exp = exp - 15 + 127
-	}
-	bits = sign<<31 | exp<<23 | frac<<13
-
-	f := math.Float32frombits(bits)
-	return float64(f)
 }
 
 func isImmutableKind(k reflect.Kind) bool {

@@ -1,5 +1,5 @@
-// Copyright (c) 2019 Faye Amacker. All rights reserved.
-// Use of this source code is governed by a MIT license found in the LICENSE file.
+// Copyright (c) Faye Amacker. All rights reserved.
+// Licensed under the MIT License. See LICENSE in the project root for license information.
 
 package cbor
 
@@ -29,27 +29,30 @@ func Valid(data []byte) (rest []byte, err error) {
 	if len(data) == 0 {
 		return nil, io.EOF
 	}
-	offset, _, _, err := checkValid(data, 0)
+	offset, _, err := valid(data, 0, 1)
 	if err != nil {
 		return nil, err
 	}
 	return data[offset:], nil
 }
 
-func checkValid(data []byte, off int) (_ int, t cborType, indefinite bool, err error) {
-	if len(data)-off < 1 {
-		return 0, 0, false, io.ErrUnexpectedEOF
-	}
+const (
+	maxNestingLevel = 32
+)
 
-	var val uint64
-	off, t, val, indefinite, err = checkTypeAndValue(data, off)
+func valid(data []byte, off int, depth int) (int, int, error) {
+	if depth > maxNestingLevel {
+		return 0, 0, errors.New("cbor: reached max depth " + strconv.Itoa(maxNestingLevel))
+	}
+	off, t, ai, val, err := validHead(data, off)
 	if err != nil {
-		return 0, 0, false, err
+		return 0, 0, err
 	}
-
-	if indefinite {
-		off, err = checkValidIndefinite(data, off, t)
-		return off, t, indefinite, err
+	if ai == 31 {
+		if t == cborTypeByteString || t == cborTypeTextString {
+			return validIndefiniteString(data, off, t, depth)
+		}
+		return validIndefiniteArrOrMap(data, off, t, depth)
 	}
 
 	switch t {
@@ -57,111 +60,156 @@ func checkValid(data []byte, off int) (_ int, t cborType, indefinite bool, err e
 		valInt := int(val)
 		if valInt < 0 {
 			// Detect integer overflow
-			return 0, 0, false, errors.New("cbor: " + t.String() + " length " + strconv.FormatUint(val, 10) + " is too large, causing integer overflow")
+			return 0, 0, errors.New("cbor: " + t.String() + " length " + strconv.FormatUint(val, 10) + " is too large, causing integer overflow")
 		}
-		if len(data)-off < valInt {
-			return 0, 0, false, io.ErrUnexpectedEOF
+		if len(data)-off < valInt { // valInt+off may overflow integer
+			return 0, 0, io.ErrUnexpectedEOF
 		}
 		off += valInt
 	case cborTypeArray, cborTypeMap:
 		valInt := int(val)
 		if valInt < 0 {
 			// Detect integer overflow
-			return 0, 0, false, errors.New("cbor: " + t.String() + " length " + strconv.FormatUint(val, 10) + " is too large, causing integer overflow")
+			return 0, 0, errors.New("cbor: " + t.String() + " length " + strconv.FormatUint(val, 10) + " is too large, causing integer overflow")
 		}
 		count := 1
 		if t == cborTypeMap {
 			count = 2
 		}
+		maxDepth := depth
 		for j := 0; j < count; j++ {
 			for i := 0; i < valInt; i++ {
-				if off, _, _, err = checkValid(data, off); err != nil {
-					return 0, 0, false, err
+				var d int
+				if off, d, err = valid(data, off, depth+1); err != nil {
+					return 0, 0, err
+				}
+				if d > maxDepth {
+					maxDepth = d // Save max depth
 				}
 			}
 		}
-	case cborTypeTag: // Check tagged item following tag.
-		return checkValid(data, off)
+		depth = maxDepth
+	case cborTypeTag:
+		// Scan nested tag numbers to avoid recursion.
+		for true {
+			if len(data)-off < 1 { // Tag number must be followed by tag content.
+				return 0, 0, io.ErrUnexpectedEOF
+			}
+			if cborType(data[off]&0xe0) != cborTypeTag {
+				break
+			}
+			if off, _, _, _, err = validHead(data, off); err != nil {
+				return 0, 0, err
+			}
+			depth++
+		}
+		// Check tag content.
+		if off, depth, err = valid(data, off, depth); err != nil {
+			return 0, 0, err
+		}
 	}
-	return off, t, indefinite, nil
+	return off, depth, nil
 }
 
-func checkValidIndefinite(data []byte, off int, t cborType) (_ int, err error) {
-	var nextType cborType
-	var indefinite bool
-	isByteOrTextString := (t == cborTypeByteString) || (t == cborTypeTextString)
-	i := 0
-	for ; true; i++ {
+func validIndefiniteString(data []byte, off int, t cborType, depth int) (int, int, error) {
+	var err error
+	for true {
 		if len(data)-off < 1 {
-			return 0, io.ErrUnexpectedEOF
+			return 0, 0, io.ErrUnexpectedEOF
 		}
-		if data[off] == 0xFF {
+		if data[off] == 0xff {
 			off++
 			break
 		}
-		if off, nextType, indefinite, err = checkValid(data, off); err != nil {
-			return 0, err
+		// Peek ahead to get next type and indefinite length status.
+		nt := cborType(data[off] & 0xe0)
+		if t != nt {
+			return 0, 0, &SyntaxError{"cbor: wrong element type " + nt.String() + " for indefinite-length " + t.String()}
 		}
-		if isByteOrTextString {
-			if t != nextType {
-				return 0, &SemanticError{"cbor: wrong element type " + nextType.String() + " for indefinite-length " + t.String()}
-			}
-			if indefinite {
-				return 0, &SemanticError{"cbor: indefinite-length " + t.String() + " chunk is not definite-length"}
-			}
+		if (data[off] & 0x1f) == 31 {
+			return 0, 0, &SyntaxError{"cbor: indefinite-length " + t.String() + " chunk is not definite-length"}
+		}
+		if off, depth, err = valid(data, off, depth); err != nil {
+			return 0, 0, err
+		}
+	}
+	return off, depth, nil
+}
+
+func validIndefiniteArrOrMap(data []byte, off int, t cborType, depth int) (int, int, error) {
+	var err error
+	maxDepth := depth
+	i := 0
+	for ; true; i++ {
+		if len(data)-off < 1 {
+			return 0, 0, io.ErrUnexpectedEOF
+		}
+		if data[off] == 0xff {
+			off++
+			break
+		}
+		var d int
+		if off, d, err = valid(data, off, depth+1); err != nil {
+			return 0, 0, err
+		}
+		if d > maxDepth {
+			maxDepth = d
 		}
 	}
 	if t == cborTypeMap && i%2 == 1 {
-		return 0, &SyntaxError{"cbor: unexpected \"break\" code"}
+		return 0, 0, &SyntaxError{"cbor: unexpected \"break\" code"}
 	}
-	return off, nil
+	return off, maxDepth, nil
 }
 
-func checkTypeAndValue(data []byte, off int) (_ int, t cborType, val uint64, indefinite bool, err error) {
-	t = cborType(data[off] & 0xE0)
-	ai := data[off] & 0x1F
+func validHead(data []byte, off int) (_ int, t cborType, ai byte, val uint64, err error) {
+	dataLen := len(data) - off
+	if dataLen < 1 {
+		return 0, 0, 0, 0, io.ErrUnexpectedEOF
+	}
+
+	t = cborType(data[off] & 0xe0)
+	ai = data[off] & 0x1f
 	val = uint64(ai)
 	off++
 
 	switch ai {
 	case 24:
-		if len(data)-off < 1 {
-			return 0, 0, 0, false, io.ErrUnexpectedEOF
+		if dataLen < 2 {
+			return 0, 0, 0, 0, io.ErrUnexpectedEOF
 		}
 		val = uint64(data[off])
 		off++
+		if t == cborTypePrimitives && val < 32 {
+			return 0, 0, 0, 0, &SyntaxError{"cbor: invalid simple value " + strconv.Itoa(int(val)) + " for type " + t.String()}
+		}
 	case 25:
-		if len(data)-off < 2 {
-			return 0, 0, 0, false, io.ErrUnexpectedEOF
+		if dataLen < 3 {
+			return 0, 0, 0, 0, io.ErrUnexpectedEOF
 		}
 		val = uint64(binary.BigEndian.Uint16(data[off : off+2]))
 		off += 2
 	case 26:
-		if len(data)-off < 4 {
-			return 0, 0, 0, false, io.ErrUnexpectedEOF
+		if dataLen < 5 {
+			return 0, 0, 0, 0, io.ErrUnexpectedEOF
 		}
 		val = uint64(binary.BigEndian.Uint32(data[off : off+4]))
 		off += 4
 	case 27:
-		if len(data)-off < 8 {
-			return 0, 0, 0, false, io.ErrUnexpectedEOF
+		if dataLen < 9 {
+			return 0, 0, 0, 0, io.ErrUnexpectedEOF
 		}
 		val = binary.BigEndian.Uint64(data[off : off+8])
 		off += 8
 	case 28, 29, 30:
-		return 0, 0, 0, false, &SyntaxError{"cbor: invalid additional information " + strconv.Itoa(int(ai)) + " for type " + t.String()}
+		return 0, 0, 0, 0, &SyntaxError{"cbor: invalid additional information " + strconv.Itoa(int(ai)) + " for type " + t.String()}
 	case 31:
 		switch t {
 		case cborTypePositiveInt, cborTypeNegativeInt, cborTypeTag:
-			return 0, 0, 0, false, &SyntaxError{"cbor: invalid additional information " + strconv.Itoa(int(ai)) + " for type " + t.String()}
-		case cborTypePrimitives: // 0xFF (break code) should not be outside checkValidIndefinite().
-			return 0, 0, 0, false, &SyntaxError{"cbor: unexpected \"break\" code"}
-		default:
-			return off, t, val, true, nil
+			return 0, 0, 0, 0, &SyntaxError{"cbor: invalid additional information " + strconv.Itoa(int(ai)) + " for type " + t.String()}
+		case cborTypePrimitives: // 0xff (break code) should not be outside validIndefinite().
+			return 0, 0, 0, 0, &SyntaxError{"cbor: unexpected \"break\" code"}
 		}
 	}
-	if t == cborTypePrimitives && ai == 24 && val < 32 {
-		return 0, 0, 0, false, &SyntaxError{"cbor: invalid simple value " + strconv.Itoa(int(val)) + " for type " + t.String()}
-	}
-	return off, t, val, false, nil
+	return off, t, ai, val, nil
 }
