@@ -64,6 +64,8 @@ github.com/golang/protobuf/ptypes/timestamp
 # github.com/json-iterator/go v1.1.10
 ## explicit
 github.com/json-iterator/go
+# github.com/klauspost/cpuid/v2 v2.0.5
+github.com/klauspost/cpuid/v2
 # github.com/mailru/easyjson v0.0.0-20190626092158-b2ccc519800e
 ## explicit
 github.com/mailru/easyjson
@@ -93,9 +95,10 @@ github.com/pmezard/go-difflib/difflib
 github.com/pquerna/ffjson/ffjson
 github.com/pquerna/ffjson/fflib/v1
 github.com/pquerna/ffjson/fflib/v1/internal
-# github.com/segmentio/encoding v0.2.2
+# github.com/segmentio/encoding v0.2.17
 ## explicit
 github.com/segmentio/encoding/ascii
+github.com/segmentio/encoding/iso8601
 github.com/segmentio/encoding/json
 # github.com/stretchr/testify v1.4.0
 ## explicit

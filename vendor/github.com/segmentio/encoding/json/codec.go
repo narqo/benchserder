@@ -340,6 +340,24 @@ func constructMapCodec(t reflect.Type, seen map[reflect.Type]*structType) codec 
 			encode: encoder.encodeMapStringRawMessage,
 			decode: decoder.decodeMapStringRawMessage,
 		}
+
+	case k == stringType && v == stringType:
+		return codec{
+			encode: encoder.encodeMapStringString,
+			decode: decoder.decodeMapStringString,
+		}
+
+	case k == stringType && v == stringsType:
+		return codec{
+			encode: encoder.encodeMapStringStringSlice,
+			decode: decoder.decodeMapStringStringSlice,
+		}
+
+	case k == stringType && v == boolType:
+		return codec{
+			encode: encoder.encodeMapStringBool,
+			decode: decoder.decodeMapStringBool,
+		}
 	}
 
 	kc := codec{}
@@ -826,7 +844,7 @@ func isValidTag(s string) bool {
 	}
 	for _, c := range s {
 		switch {
-		case strings.ContainsRune("!#$%&()*+-./:<=>?@[]^_{|}~ ", c):
+		case strings.ContainsRune("!#$%&()*+-./:;<=>?@[]^_{|}~ ", c):
 			// Backslash and quote chars are reserved, but
 			// otherwise any punctuation chars are allowed
 			// in a tag name.
@@ -965,17 +983,6 @@ func syntaxError(b []byte, msg string, args ...interface{}) error {
 	return e
 }
 
-func inputError(b []byte, t reflect.Type) ([]byte, error) {
-	if len(b) == 0 {
-		return nil, unexpectedEOF(b)
-	}
-	_, r, err := parseValue(b)
-	if err != nil {
-		return r, err
-	}
-	return skipSpaces(r), unmarshalTypeError(b, t)
-}
-
 func objectKeyError(b []byte, err error) ([]byte, error) {
 	if len(b) == 0 {
 		return nil, unexpectedEOF(b)
@@ -1004,13 +1011,18 @@ func uintStringsAreSorted(u0, u1 uint64) bool {
 	return string(strconv.AppendUint(b0[:0], u0, 10)) < string(strconv.AppendUint(b1[:0], u1, 10))
 }
 
-//go:nosplit
 func stringToBytes(s string) []byte {
-	return *(*[]byte)(unsafe.Pointer(&reflect.SliceHeader{
-		Data: ((*reflect.StringHeader)(unsafe.Pointer(&s))).Data,
+	return *(*[]byte)(unsafe.Pointer(&sliceHeader{
+		Data: *(*unsafe.Pointer)(unsafe.Pointer(&s)),
 		Len:  len(s),
 		Cap:  len(s),
 	}))
+}
+
+type sliceHeader struct {
+	Data unsafe.Pointer
+	Len  int
+	Cap  int
 }
 
 var (
@@ -1035,6 +1047,7 @@ var (
 
 	numberType     = reflect.TypeOf(json.Number(""))
 	stringType     = reflect.TypeOf("")
+	stringsType    = reflect.TypeOf([]string(nil))
 	bytesType      = reflect.TypeOf(([]byte)(nil))
 	durationType   = reflect.TypeOf(time.Duration(0))
 	timeType       = reflect.TypeOf(time.Time{})
@@ -1045,9 +1058,13 @@ var (
 	timePtrType       = reflect.PtrTo(timeType)
 	rawMessagePtrType = reflect.PtrTo(rawMessageType)
 
-	sliceInterfaceType      = reflect.TypeOf(([]interface{})(nil))
-	mapStringInterfaceType  = reflect.TypeOf((map[string]interface{})(nil))
-	mapStringRawMessageType = reflect.TypeOf((map[string]RawMessage)(nil))
+	sliceInterfaceType       = reflect.TypeOf(([]interface{})(nil))
+	sliceStringType          = reflect.TypeOf(([]interface{})(nil))
+	mapStringInterfaceType   = reflect.TypeOf((map[string]interface{})(nil))
+	mapStringRawMessageType  = reflect.TypeOf((map[string]RawMessage)(nil))
+	mapStringStringType      = reflect.TypeOf((map[string]string)(nil))
+	mapStringStringSliceType = reflect.TypeOf((map[string][]string)(nil))
+	mapStringBoolType        = reflect.TypeOf((map[string]bool)(nil))
 
 	interfaceType       = reflect.TypeOf((*interface{})(nil)).Elem()
 	jsonMarshalerType   = reflect.TypeOf((*Marshaler)(nil)).Elem()
