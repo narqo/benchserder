@@ -12,6 +12,17 @@ github.com/fxamacker/cbor/v2
 # github.com/go-stack/stack v1.8.0
 ## explicit
 github.com/go-stack/stack
+# github.com/goccy/go-json v0.4.11
+## explicit
+github.com/goccy/go-json
+github.com/goccy/go-json/internal/encoder
+github.com/goccy/go-json/internal/encoder/vm
+github.com/goccy/go-json/internal/encoder/vm_debug
+github.com/goccy/go-json/internal/encoder/vm_escaped
+github.com/goccy/go-json/internal/encoder/vm_escaped_indent
+github.com/goccy/go-json/internal/encoder/vm_indent
+github.com/goccy/go-json/internal/errors
+github.com/goccy/go-json/internal/runtime
 # github.com/gogo/protobuf v1.3.0
 ## explicit
 github.com/gogo/protobuf/gogoproto
