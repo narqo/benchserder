@@ -7,6 +7,7 @@ import (
 
 	"github.com/fxamacker/cbor"
 	cborv2 "github.com/fxamacker/cbor/v2"
+	goccyjson "github.com/goccy/go-json"
 	"github.com/golang/protobuf/proto"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/mailru/easyjson"
@@ -84,6 +85,13 @@ var marshallers = []struct {
 		&testMarshaller{
 			Marshal:   segmentiojson.Marshal,
 			Unmarshal: segmentiojson.Unmarshal,
+		},
+	},
+	{
+		"goccy-json",
+		&testMarshaller{
+			Marshal:   goccyjson.Marshal,
+			Unmarshal: goccyjson.Unmarshal,
 		},
 	},
 	{
