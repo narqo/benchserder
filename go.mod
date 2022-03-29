@@ -8,7 +8,7 @@ require (
 	github.com/fxamacker/cbor/v2 v2.2.0
 	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/goccy/go-json v0.4.11
-	github.com/gogo/protobuf v1.3.0
+	github.com/gogo/protobuf v1.3.2
 	github.com/golang/protobuf v1.3.2
 	github.com/google/go-cmp v0.3.1 // indirect
 	github.com/json-iterator/go v1.1.10
@@ -24,7 +24,6 @@ require (
 	github.com/ugorji/go/codec v1.1.7
 	github.com/vmihailenco/msgpack/v4 v4.2.0
 	go.mongodb.org/mongo-driver v1.1.0
-	golang.org/x/net v0.0.0-20190812203447-cdfb69ac37fc // indirect
 	google.golang.org/appengine v1.6.2 // indirect
 	google.golang.org/grpc v1.23.0 // indirect
 	gopkg.in/src-d/go-parse-utils.v1 v1.1.2 // indirect

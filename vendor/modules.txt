@@ -23,7 +23,7 @@ github.com/goccy/go-json/internal/encoder/vm_escaped_indent
 github.com/goccy/go-json/internal/encoder/vm_indent
 github.com/goccy/go-json/internal/errors
 github.com/goccy/go-json/internal/runtime
-# github.com/gogo/protobuf v1.3.0
+# github.com/gogo/protobuf v1.3.2
 ## explicit
 github.com/gogo/protobuf/gogoproto
 github.com/gogo/protobuf/plugin/compare
@@ -127,12 +127,12 @@ go.mongodb.org/mongo-driver/bson/bsonrw
 go.mongodb.org/mongo-driver/bson/bsontype
 go.mongodb.org/mongo-driver/bson/primitive
 go.mongodb.org/mongo-driver/x/bsonx/bsoncore
-# golang.org/x/net v0.0.0-20190812203447-cdfb69ac37fc
-## explicit
+# golang.org/x/net v0.0.0-20201021035429-f5854403a974
 golang.org/x/net/context
-# golang.org/x/sys v0.0.0-20190813064441-fde4db37ae7a
+# golang.org/x/sys v0.0.0-20200930185726-fdedc70b468f
+golang.org/x/sys/internal/unsafeheader
 golang.org/x/sys/unix
-# golang.org/x/text v0.3.2
+# golang.org/x/text v0.3.3
 golang.org/x/text/runes
 golang.org/x/text/transform
 golang.org/x/text/unicode/norm
