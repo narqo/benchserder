@@ -10,7 +10,6 @@ github.com/fxamacker/cbor
 ## explicit
 github.com/fxamacker/cbor/v2
 # github.com/go-stack/stack v1.8.0
-## explicit
 github.com/go-stack/stack
 # github.com/goccy/go-json v0.4.11
 ## explicit
@@ -59,8 +58,6 @@ github.com/gogo/protobuf/vanity/command
 github.com/golang/protobuf/proto
 github.com/golang/protobuf/ptypes/duration
 github.com/golang/protobuf/ptypes/timestamp
-# github.com/google/go-cmp v0.3.1
-## explicit
 # github.com/json-iterator/go v1.1.10
 ## explicit
 github.com/json-iterator/go
@@ -100,12 +97,10 @@ github.com/pquerna/ffjson/fflib/v1/internal
 github.com/segmentio/encoding/ascii
 github.com/segmentio/encoding/iso8601
 github.com/segmentio/encoding/json
-# github.com/stretchr/testify v1.4.0
+# github.com/stretchr/testify v1.6.1
 ## explicit
 github.com/stretchr/testify/assert
 github.com/stretchr/testify/require
-# github.com/tidwall/pretty v1.0.0
-## explicit
 # github.com/ugorji/go/codec v1.1.7
 ## explicit
 github.com/ugorji/go/codec
@@ -119,10 +114,11 @@ github.com/vmihailenco/tagparser/internal
 github.com/vmihailenco/tagparser/internal/parser
 # github.com/x448/float16 v0.8.4
 github.com/x448/float16
-# go.mongodb.org/mongo-driver v1.1.0
+# go.mongodb.org/mongo-driver v1.5.1
 ## explicit
 go.mongodb.org/mongo-driver/bson
 go.mongodb.org/mongo-driver/bson/bsoncodec
+go.mongodb.org/mongo-driver/bson/bsonoptions
 go.mongodb.org/mongo-driver/bson/bsonrw
 go.mongodb.org/mongo-driver/bson/bsontype
 go.mongodb.org/mongo-driver/bson/primitive
@@ -132,7 +128,7 @@ golang.org/x/net/context
 # golang.org/x/sys v0.0.0-20200930185726-fdedc70b468f
 golang.org/x/sys/internal/unsafeheader
 golang.org/x/sys/unix
-# golang.org/x/text v0.3.3
+# golang.org/x/text v0.3.5
 golang.org/x/text/runes
 golang.org/x/text/transform
 golang.org/x/text/unicode/norm
@@ -166,6 +162,6 @@ gopkg.in/src-d/proteus.v1/scanner
 # gopkg.in/urfave/cli.v1 v1.0.0-00010101000000-000000000000 => github.com/urfave/cli v1.21.0
 ## explicit
 gopkg.in/urfave/cli.v1
-# gopkg.in/yaml.v2 v2.2.2
-gopkg.in/yaml.v2
+# gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c
+gopkg.in/yaml.v3
 # gopkg.in/urfave/cli.v1 => github.com/urfave/cli v1.21.0
