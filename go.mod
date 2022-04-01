@@ -6,11 +6,9 @@ require (
 	github.com/fatih/color v1.7.0 // indirect
 	github.com/fxamacker/cbor v1.5.1
 	github.com/fxamacker/cbor/v2 v2.2.0
-	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/goccy/go-json v0.4.11
 	github.com/gogo/protobuf v1.3.2
 	github.com/golang/protobuf v1.3.2
-	github.com/google/go-cmp v0.3.1 // indirect
 	github.com/json-iterator/go v1.1.10
 	github.com/mailru/easyjson v0.0.0-20190626092158-b2ccc519800e
 	github.com/mattn/go-colorable v0.1.2 // indirect
@@ -19,11 +17,10 @@ require (
 	github.com/modern-go/reflect2 v1.0.1 // indirect
 	github.com/pquerna/ffjson v0.0.0-20190930134022-aa0246cd15f7
 	github.com/segmentio/encoding v0.2.17
-	github.com/stretchr/testify v1.4.0
-	github.com/tidwall/pretty v1.0.0 // indirect
+	github.com/stretchr/testify v1.6.1
 	github.com/ugorji/go/codec v1.1.7
 	github.com/vmihailenco/msgpack/v4 v4.2.0
-	go.mongodb.org/mongo-driver v1.1.0
+	go.mongodb.org/mongo-driver v1.5.1
 	google.golang.org/appengine v1.6.2 // indirect
 	google.golang.org/grpc v1.23.0 // indirect
 	gopkg.in/src-d/go-parse-utils.v1 v1.1.2 // indirect
