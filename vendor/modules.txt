@@ -53,7 +53,7 @@ github.com/gogo/protobuf/sortkeys
 github.com/gogo/protobuf/types
 github.com/gogo/protobuf/vanity
 github.com/gogo/protobuf/vanity/command
-# github.com/golang/protobuf v1.3.2
+# github.com/golang/protobuf v1.5.2
 ## explicit
 github.com/golang/protobuf/proto
 github.com/golang/protobuf/ptypes/duration
@@ -97,7 +97,7 @@ github.com/pquerna/ffjson/fflib/v1/internal
 github.com/segmentio/encoding/ascii
 github.com/segmentio/encoding/iso8601
 github.com/segmentio/encoding/json
-# github.com/stretchr/testify v1.6.1
+# github.com/stretchr/testify v1.8.1
 ## explicit
 github.com/stretchr/testify/assert
 github.com/stretchr/testify/require
@@ -123,17 +123,15 @@ go.mongodb.org/mongo-driver/bson/bsonrw
 go.mongodb.org/mongo-driver/bson/bsontype
 go.mongodb.org/mongo-driver/bson/primitive
 go.mongodb.org/mongo-driver/x/bsonx/bsoncore
-# golang.org/x/net v0.0.0-20201021035429-f5854403a974
+# golang.org/x/net v0.5.0
 golang.org/x/net/context
-# golang.org/x/sys v0.0.0-20200930185726-fdedc70b468f
-golang.org/x/sys/internal/unsafeheader
+# golang.org/x/sys v0.4.0
 golang.org/x/sys/unix
-# golang.org/x/text v0.3.5
+# golang.org/x/text v0.6.0
 golang.org/x/text/runes
 golang.org/x/text/transform
 golang.org/x/text/unicode/norm
-# google.golang.org/appengine v1.6.2
-## explicit
+# google.golang.org/appengine v1.6.7
 google.golang.org/appengine
 google.golang.org/appengine/datastore
 google.golang.org/appengine/datastore/internal/cloudkey
@@ -145,8 +143,38 @@ google.golang.org/appengine/internal/datastore
 google.golang.org/appengine/internal/log
 google.golang.org/appengine/internal/modules
 google.golang.org/appengine/internal/remote_api
-# google.golang.org/grpc v1.23.0
+# google.golang.org/grpc v1.53.0
 ## explicit
+# google.golang.org/protobuf v1.28.1
+google.golang.org/protobuf/encoding/prototext
+google.golang.org/protobuf/encoding/protowire
+google.golang.org/protobuf/internal/descfmt
+google.golang.org/protobuf/internal/descopts
+google.golang.org/protobuf/internal/detrand
+google.golang.org/protobuf/internal/encoding/defval
+google.golang.org/protobuf/internal/encoding/messageset
+google.golang.org/protobuf/internal/encoding/tag
+google.golang.org/protobuf/internal/encoding/text
+google.golang.org/protobuf/internal/errors
+google.golang.org/protobuf/internal/filedesc
+google.golang.org/protobuf/internal/filetype
+google.golang.org/protobuf/internal/flags
+google.golang.org/protobuf/internal/genid
+google.golang.org/protobuf/internal/impl
+google.golang.org/protobuf/internal/order
+google.golang.org/protobuf/internal/pragma
+google.golang.org/protobuf/internal/set
+google.golang.org/protobuf/internal/strs
+google.golang.org/protobuf/internal/version
+google.golang.org/protobuf/proto
+google.golang.org/protobuf/reflect/protodesc
+google.golang.org/protobuf/reflect/protoreflect
+google.golang.org/protobuf/reflect/protoregistry
+google.golang.org/protobuf/runtime/protoiface
+google.golang.org/protobuf/runtime/protoimpl
+google.golang.org/protobuf/types/descriptorpb
+google.golang.org/protobuf/types/known/durationpb
+google.golang.org/protobuf/types/known/timestamppb
 # gopkg.in/src-d/go-parse-utils.v1 v1.1.2
 ## explicit
 gopkg.in/src-d/go-parse-utils.v1
@@ -162,6 +190,6 @@ gopkg.in/src-d/proteus.v1/scanner
 # gopkg.in/urfave/cli.v1 v1.0.0-00010101000000-000000000000 => github.com/urfave/cli v1.21.0
 ## explicit
 gopkg.in/urfave/cli.v1
-# gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c
+# gopkg.in/yaml.v3 v3.0.1
 gopkg.in/yaml.v3
 # gopkg.in/urfave/cli.v1 => github.com/urfave/cli v1.21.0
